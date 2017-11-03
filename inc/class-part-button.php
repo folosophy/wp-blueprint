@@ -6,7 +6,9 @@ class Button extends Part {
 
   protected $type;
   protected $class;
+  protected $id;
   protected $label;
+  protected $link;
 
   function __construct($type='light',$label='Learn More',$link='#section-next') {
     $this->type = $type;
@@ -25,9 +27,14 @@ class Button extends Part {
     return $this;
   }
 
+  function setLink($link) {
+    $this->link = $link;
+    return $this;
+  }
+
   function build() {
     return "
-      <a class='$this->class'>$this->label</a>
+      <a href='$this->link' class='$this->class'>$this->label</a>
     ";
   }
 

@@ -17,7 +17,6 @@ class Grid extends Part {
   }
 
   function addItem($item=null) {
-    if (!$this->cols) {$colClass = 'col-3';}
     $this->items .= "
       <div class='$this->colClass'>
         $item
@@ -26,8 +25,10 @@ class Grid extends Part {
     return $this;
   }
 
-  function setCols($cols=3) {
-    $this->cols = $cols;
+  function setCols($num=3) {
+    if (!$num || !is_int($num)) {$num = 3;}
+    $this->cols = $num;
+    $this->colClass = 'col-' . $num;
     return $this;
   }
 

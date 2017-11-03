@@ -1,8 +1,7 @@
 <?php
 
 use Blueprint as Bp;
-use Blueprint\Media as Media;
-use Blueprint\Media\Image as Image;
+use Blueprint\Part\Image as Image;
 
 function bp_get_img($class=null,$size=null,$img_id=null) {
   return (new Image())

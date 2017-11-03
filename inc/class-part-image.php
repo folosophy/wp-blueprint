@@ -1,8 +1,10 @@
 <?php
 
-namespace Blueprint\Media;
+namespace Blueprint\Part;
 
-class Image extends Media {
+class Image extends Part {
+
+  use MediaBuilder;
 
   protected $size;
   protected $class;

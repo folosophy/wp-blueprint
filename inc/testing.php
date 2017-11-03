@@ -65,14 +65,10 @@ function bp_acf_admin_style() {
         min-height: 0 !important;
       }
       .wp-media-buttons .insert-media {display:none;}
-      .nolabel .acf-label, .hide {display:none;}
+      .-top-------- .nolabel > .acf-label, .hide {display:none;}
       #commentstatusdiv {display:none;}
-      .acf-field-group {padding:0 !important;}
-      .acf-field-group > .acf-label {display:none !important;}
-      .acf-field-group .acf-fields {border:none !important;}
-      .acf-field-group .acf-field-group > .acf-input {padding:0 !important;}
-      .acf-field-group > .acf-input {padding-left: 0 !important;}
-      .acf-field-group {border-top: 2px solid rgba(0,0,0,.1) !important;}
+
+      .acf-clone-fields {border:none !important; padding:none !important;}
     </style>
   ";
 } add_action('admin_head','bp_acf_admin_style');
@@ -202,3 +198,43 @@ add_action('acf/render_field',function($field) {
   }
   return $field;
 });
+
+// Vars
+
+function bp_set_var($key,$value) {
+  $GLOBALS['wp_blueprint'][$key] = $value;
+}
+// TODO: accept key and fallback arrays
+function bp_var($key,$fallback_value=null) {
+  if (!isset($GLOBALS['wp_blueprint'])) {
+    $GLOBALS['wp_blueprint'] = array();
+  }
+  if (isset($GLOBALS['wp_blueprint'][$key])) {
+    return $GLOBALS['wp_blueprint'][$key];
+  } else {
+    if ($fallback_value !== null) {return $fallback_value;}
+    else {return false;}
+  }
+}
+
+// Excerpt Length
+
+function custom_excerpt_length( $length ) {
+	return bp_var('excerpt_length',20);
+}
+add_filter( 'excerpt_length', 'custom_excerpt_length', 999 );
+
+// Excerpt more
+
+function new_excerpt_more( $more ) {
+    return " ...";
+}
+add_filter('excerpt_more', 'new_excerpt_more');
+
+// Remove posts from menu
+
+add_action('admin_menu','remove_default_post_type');
+
+function remove_default_post_type() {
+	remove_menu_page('edit.php');
+}

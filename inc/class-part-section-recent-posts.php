@@ -22,7 +22,7 @@ class RecentPosts extends Part\Section {
   }
 
   function build() {
-    $this->addPart($this->grid->build());
+    $this->addHtml($this->grid->build());
     return parent::build();
   }
 

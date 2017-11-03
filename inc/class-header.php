@@ -54,10 +54,18 @@ class Header {
     $this->pageTitle = $title;
   }
 
+  function preBuild() {
+    $navbar = $this->navBar;
+    if ($navbar) {
+      $this->navBar = $this->navBar->build();
+    }
+  }
+
   function build() {
     if (!$this->nav) {$this->setNav();}
     $nav = $this->nav->build();
     if ($this->navBar) {$navbar = $this->navBar->build();}
+    else {$navbar = null;}
     return "
       <header class='header-main'>
         $navbar
@@ -68,50 +76,6 @@ class Header {
 
   function render() {
     echo $this->build();
-  }
-
-  function preBuild() {
-    $navbar = $this->navBar;
-    if ($navbar) {
-      $this->navBar = $this->navBar->build();
-    }
-  }
-
-  public function renders() {
-    $this->setParts();
-    $menuMain = new MenuMain();
-    $this->menuMain = $menuMain->getBuild();
-    echo "
-          <div class='site-bg'></div>
-            <header class='header-main'>
-              <nav class='nav-main'>
-                <div class='nav-main__wrap'>
-                  <a class='nav-main__brand' href='$this->siteUrl'>
-                    <div class='nav-main__name'>$this->siteName</div>
-                  </a>
-                  <div class='menu-mobile'>
-                    <header class='menu-mobile__header'>
-                      <div class='menu-mobile__exit'>
-                        <div class='menu-mobile__exit-icon'></div>
-                      </div>
-                    </header>
-                    $this->menuMain
-                  </div>
-                  <div class='menu-main__toggle'>
-                    <span class='menu-main__toggle__label'>MENU</span>
-                    <div class='menu-main__toggle__icon'>
-                      <div class='menu-main__toggle__top'></div>
-                      <div class='menu-main__toggle__mid'></div>
-                      <div class='menu-main__toggle__bot'></div>
-                    </div>
-                  </div>
-                </div>
-              </nav>
-            </header>
-
-            <div id='page'>
-
-            ";
   }
 
 }

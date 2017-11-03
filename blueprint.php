@@ -47,15 +47,17 @@ class Blueprint {
     }
     bp_glob_require('inc/core*',BP);
     // TODO: require actions automatically
-    add_action('acf/init',function() {
-      bp_require('inc/action-acf-init-core-fields',BP);
-    });
-    add_action('bp/acf/after_core',function() {
+    bp_require('inc/acf-core-fields',BP);
+    add_action('init',function() {
       bp_glob_require('inc/fields*');
     });
   }
 
-} Blueprint::init();
+}
+
+if (function_exists('acf_add_local_field_group')) {
+  Blueprint::init();
+}
 
 // TODO: Move to own file
 

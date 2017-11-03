@@ -31,11 +31,15 @@ function fsyMobileNav() {
 } fsyMobileNav();
 
 function fsyAnchorScroll() {
+
   var $anchor = $('a[href^="#"]');
   $anchor.on('click touchstart', function(e) {
     e.preventDefault();
     var $that = $(this),
         $target = $($that.attr('href'));
+    if ($that.attr('href') == '#section-next') {
+      $target = $that.closest('section').next();
+    }
     // Scroll to target
     if ($target.length == 1) {
       console.log($target);
@@ -46,6 +50,7 @@ function fsyAnchorScroll() {
       document.location.href = WPURLS.siteurl + '/' + $that.attr('href');
     }
   });
+
 } fsyAnchorScroll();
 
 class Nav {

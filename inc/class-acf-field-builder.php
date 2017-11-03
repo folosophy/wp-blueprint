@@ -12,6 +12,26 @@ trait FieldBuilder {
     else {return $this;}
   }
 
+  function addButton($name='button',$chain=false) {
+    $field = (new Field\Group($name,$this))
+      ->addMessage('')
+      ->addText('label')
+      ->addSelect('link_target')
+        ->setChoices(array(
+          'external',
+          'internal',
+          'section'
+        ))
+        ->endSelect()
+      ->addUrl('external_link',true)
+        ->setLogic('link_target','external')
+        ->end()
+      ->addPostObject('internal_link',true)
+        ->setLogic('link_target','internal')
+        ->end();
+    return $this->addField($field,$chain);
+  }
+
   function addCheckbox($name) {
     $field = new Field\Checkbox($name,$this);
     return $field;
@@ -23,15 +43,22 @@ trait FieldBuilder {
     return $field;
   }
 
-  function addClone($name,$key,$chain=false) {
+  function addClone($name,$clone_key,$chain=false) {
+    // clone_key must be prefixed with field_ or group_
     $field = (new Field\Duplicate($name,$this))
-      ->addClone($key);
+      ->setDisplay('seamless')
+      ->addClone($clone_key);
     return $this->addField($field,$chain);
   }
 
   function addCopy($name='copy',$chain=false) {
     $field = (new field\Wysiwyg($name,$this));
     return $this->addField($field);
+  }
+
+  function addDateTime($name,$chain=false) {
+    $field = (new field\DateTimePicker($name,$this));
+    return $this->addField($field,$chain);
   }
 
   function addHeadline($name='headline',$chain=false) {
@@ -113,7 +140,6 @@ trait FieldBuilder {
 
   function addUrl($name,$chain=false) {
     $field = (new Field\Url($name,$this));
-    array_push($this->fields,$field);
     return $this->addField($field,$chain);
   }
 

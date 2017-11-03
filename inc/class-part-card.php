@@ -9,9 +9,11 @@ class Card extends Part {
   protected $class;
   protected $content;
   protected $media;
+  protected $mediaField;
   protected $reverse;
   protected $mediaType;
   protected $title;
+  protected $link;
   protected $subHeadline;
 
   protected function init() {
@@ -19,6 +21,7 @@ class Card extends Part {
     $this->setSubHeadline();
     $this->setMedia();
     $this->setType();
+    $this->link = get_the_permalink();
   }
 
   protected function setBody() {
@@ -35,10 +38,12 @@ class Card extends Part {
   }
 
   protected function setContent() {
+    $excerpt = get_the_excerpt();
     $this->content = "
       <div class='card__content'>
         $this->subHeadline
         <h5>$this->title</h5>
+        <p class='p2'>$excerpt</p>
       </div>
     ";
   }
@@ -55,19 +60,20 @@ class Card extends Part {
     return $img;
   }
 
-  protected function getField($name) {
-    return get_field(get_post_type() . '_' . $name);
-  }
-
   function setMedia($media=null) {
-    $media_format = get_field(get_post_type() . '_media_format');
+    $field = get_field('featured_media');
+    $media_format = $field['format'];
     switch ($media_format) {
       case 'video' :
-        $source = $this->getField('video_source');
-        switch ($source) {
-          case 'youtube' : $video_id   = $this->getField('youtube_video_id');
+        $video_field = $field['video'];
+        if (isset($video_field['video'])) {
+          $video_field = $video_field['video'];
         }
-        $media = (new \Blueprint\Media\Video($video_id,$source))->build();
+        $source      = $video_field['source'];
+        switch ($source) {
+          case 'youtube' : $video_id   = $video_field['youtube_id'];
+        }
+        $media = (new \Blueprint\Part\Video($video_id,$source))->build();
         break;
       default : $media = $this->getImage();
     }
@@ -80,7 +86,9 @@ class Card extends Part {
 
   function setSubHeadline($headline=null) {
     if (!$headline) {
-      $cats = get_the_terms(get_the_id(),get_post_type() . '_category');
+      if (get_post_type() == 'post') {$cats = get_the_category();}
+      //else {$cats = get_the_terms(get_the_id(),get_post_type() . '_category');}
+      else {$cats = null;}
     }
     if ($cats) {$headline = $cats[0]->name;}
     else {$headline = 'Uncategorized';}
@@ -91,11 +99,11 @@ class Card extends Part {
 
   function build() {
     $this->setBody();
-    bp\log_post();
+    bp_log_post();
     return "
-      <div class='$this->class'>
+      <a class='$this->class' href='$this->link'>
         $this->body
-      </div>
+      </a>
     ";
   }
 

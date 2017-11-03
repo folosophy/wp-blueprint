@@ -1,10 +1,11 @@
 <?php
 
-namespace Blueprint\Media;
+namespace Blueprint\Part;
 
-class Video extends Media {
+class Video extends Part {
 
   protected $field;
+  protected $playButton;
   protected $thumbnail;
   protected $video;
   protected $videoAtts;
@@ -27,6 +28,7 @@ class Video extends Media {
   function setThumbnail() {
     if ($this->field && $this->field['thumbnail']) {
       $this->thumbnail = \bp_get_img('img-bg','medium',$this->field['thumbnail']);
+      $this->playButton = "<div class='button-play'></div>";
     }
     return $this;
   }
@@ -37,18 +39,22 @@ class Video extends Media {
   }
 
   function setVimeo() {
-    $this->videoSrc = "https://player.vimeo.com/video/$this->videoId";
+    $this->videoSrc = "https://player.vimeo.com/video/$this->videoId?showinfo=0";
     $this->videoAtts = "frameborder='0' webkitallowfullscreen mozallowfullscreen allowfullscreen";
   }
 
   function build() {
     return "
-      <div class='container-medium'>
-        <div class='container-iframe'>
-          <iframe class='img-bg' src='$this->videoSrc' $this->videoAtts></iframe>
-          $this->thumbnail
-        </div>
-      </div>
+      <iframe
+        class='img-bg'
+        src='$this->videoSrc'
+        play-src='$this->videoSrc&autoplay=1'
+        reset-src='$this->videoSrc'
+        $this->videoAtts
+      ></iframe>
+      <div class='theater-exit'></div>
+      $this->playButton
+      $this->thumbnail
     ";
   }
 

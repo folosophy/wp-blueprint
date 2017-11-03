@@ -5,13 +5,22 @@ namespace Blueprint\Part;
 class Head  {
 
   private $wpHead;
+  protected $bodyClass;
   private $charset;
   public $build;
 
   function __construct() {
+    $this->setBodyType();
     $this->setInfo();
     $this->setWpHead();
     $this->setHead();
+  }
+
+  function setBodyType() {
+    if (is_single()) {$type = 'single';}
+    elseif (is_page()) {$type = 'page';}
+    $this->bodyClass .= ' body-' . $type;
+    return $this;
   }
 
   private function setInfo() {
@@ -37,6 +46,7 @@ class Head  {
           <title>$this->siteName | $this->pageTitle</title>
           $this->wpHead
         </head>
+        <body class='$this->bodyClass'>
     ";
   }
 

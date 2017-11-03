@@ -12,11 +12,11 @@ class Logic {
 
   function __construct($parentInstance) {
     $this->parentInstance = $parentInstance;
-    $this->prefix = $parentInstance->getParentKey() . '_';
+    $this->prefix = $parentInstance->getPrefix();
   }
 
   function addCondition($field,$value,$operator='==') {
-    $field = $this->prefix . str_replace('field_','',$field);
+    $field = 'field_' . str_replace('field_','',$field);
     array_push(
       $this->conditions,
       array(
@@ -31,7 +31,7 @@ class Logic {
   }
 
   function andCondition($field,$value,$operator='==') {
-    $field = $this->prefix . str_replace('field_','',$field);
+    $field = 'field_' . str_replace('field_','',$field);
     $index = count($this->conditions) - 1;
     array_push(
       $this->conditions[$index],

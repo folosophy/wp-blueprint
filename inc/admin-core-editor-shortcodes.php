@@ -33,7 +33,7 @@ namespace Blueprint {
     }
 
     protected function buildImage() {
-      $sizes = Media\Image::getSizes();
+      $sizes = Part\Image::getSizes();
       $size_options = '<option selected disabled>Select a size</option>';
       foreach ($sizes as $size => $info) {
         $label = $info['label'];

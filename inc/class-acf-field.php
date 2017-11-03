@@ -12,16 +12,22 @@ class Field {
   protected $name;
   protected $field = array();
   protected $hidden;
+  protected $key;
   protected $logic;
   protected $prefix;
 
   function __construct($key,$parentInstance) {
     $this->parentInstance = $parentInstance;
     $this->setName($key);
-    $this->setKey($key);
-    $this->setLabel();
-    if (method_exists($this,'init')) {$this->init();}
     $this->setPrefix();
+    $this->setLabel();
+    $this->field['wrapper'] = array();
+    if (method_exists($this,'init')) {$this->init();}
+    if ($this->field['type'] !== 'clone') {$this->field['required'] = 1;}
+  }
+
+  function dumpField() {
+    diedump($this->field);
   }
 
   function getKey() {
@@ -33,7 +39,11 @@ class Field {
   }
 
   function getParentKey() {
-    return $this->parentInstance->getKey();
+    if (is_subclass_of($this->parentInstance,'Blueprint\Acf\Field')) {
+      return $this->parentInstance->getKey();
+    } else {
+      return null;
+    }
   }
 
   function getType() {
@@ -54,13 +64,26 @@ class Field {
   protected function setPrefix() {
     $parent = $this->parentInstance;
     if (is_subclass_of($parent,'Blueprint\Acf\Field')) {
-      $this->field['key'] = $parent->getKey() . '_' . $this->name;
+      $this->prefix = $parent->getKey() . '_';
+    } else {
+      $this->prefix = 'field_';
     }
+  }
+
+  function getPrefix() {
+    return $this->prefix;
   }
 
   function setClass($class) {
     $this->field['wrapper']['class'] = $class;
     return $this;
+  }
+
+  function addClass($class) {
+    if (!isset($this->field['wrapper']['class'])) {
+      $this->field['wrapper']['class'] = '';
+    }
+    $this->field['wrapper']['class'] .= " $class ";
   }
 
   function setDefaultValue($value) {
@@ -74,7 +97,9 @@ class Field {
   }
 
    protected function setKey($key) {
-    $this->field['key'] = 'field_' . $this->prefix . $key;
+    $key = $this->prefix . $key;
+    $this->key = $key;
+    $this->field['key'] = $key;
     return $this;
   }
 
@@ -82,8 +107,8 @@ class Field {
     $this->name = strtolower($name);
     $this->field['name']  = $name;
     $this->field['_name'] = $name;
-    $this->setKey($name);
     $this->setPrefix();
+    $this->setKey($name);
     return $this;
   }
 
@@ -104,13 +129,22 @@ class Field {
   }
 
   function setRequired($required=1) {
-    $this->field['required'] = $required;
+    if ($required) {$this->field['required'] = $required;}
+    elseif ($required == null) {unset($this->field['required']);}
+    return $this;
+  }
+
+  function setWidth($width) {
+    $this->field['wrapper']['width'] = $width;
     return $this;
   }
 
   function getField() {
     if ($this->logic) {
       $this->field['conditional_logic'] = $this->logic->getConditions();
+    }
+    if ($this->field['name'] == 'headline') {
+      //diedump($this->field['key']);
     }
     return $this->field;
   }

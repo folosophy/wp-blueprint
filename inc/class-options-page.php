@@ -60,8 +60,8 @@ class OptionsPage {
 
   function add() {
     $parent = $this->parent;
-    if ($parent) {acf_add_options_sub_page($this->getOptions());}
-    else {acf_add_options_page($this->getOptions());}
+    if ($parent) {\acf_add_options_sub_page($this->getOptions());}
+    else {\acf_add_options_page($this->getOptions());}
   }
 
 }

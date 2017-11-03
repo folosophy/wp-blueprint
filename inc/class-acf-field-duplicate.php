@@ -20,4 +20,18 @@ class Duplicate extends Field {
     return $this;
   }
 
+  function setDisplay($display='group') {
+    $choices = array('group','seamless');
+    if (!in_array($display,$choices)) {
+      $this->throwInputError('group or seamless');
+    }
+    $this->field['display'] = $display;
+    return $this;
+  }
+
+  function setKey($key) {
+    $key = $this->name . '_clone';
+    parent::setKey($key);
+  }
+
 }

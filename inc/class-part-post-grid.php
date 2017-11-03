@@ -6,15 +6,18 @@ use Blueprint as bp;
 class PostGrid extends Grid {
 
   protected $args;
-  protected $numPosts = 3;
+  protected $numPosts;
   protected $postType = 'post';
   protected $itemBuilder;
 
   protected function init() {
+    $this->setCols(bp_var('post_grid_columns',3));
     $this->setArgs();
+    $this->setNotIn();
   }
 
   function setArgs() {
+    if (!$this->numPosts) {$this->numPosts = $this->cols;}
     $args  = array(
       'post_type'   => $this->postType,
       'numberposts' => $this->numPosts
@@ -51,9 +54,15 @@ class PostGrid extends Grid {
   }
 
   function setNotIn($ids = null) {
-    if (!$ids) {$ids = bp\get_post_log();}
+    if (!$ids) {$ids = bp_get_post_log();}
     if ($ids) {$this->args['post__not_in'] = $ids;}
     $this->args['post__not_in'] = $ids;
+    return $this;
+  }
+
+  function setNumberPosts($num=null) {
+    if (!$num || !is_int($num)) {$num = $this->cols;}
+    $this->args['numberposts'] = $num;
     return $this;
   }
 
@@ -64,7 +73,8 @@ class PostGrid extends Grid {
     return $this;
   }
 
-  function setPostType($type) {
+  function setPostType($type=null) {
+    if (!$type) {$type = get_post_type();}
     $this->args['post_type'] = $type;
     return $this;
   }

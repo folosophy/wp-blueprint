@@ -22,13 +22,18 @@ class NavBar extends Part {
   }
 
   function addSocial() {
-    $accounts = \bp_get_social();
+    $accounts = get_field('main_social','option');
+    if (!$accounts) {return $this;}
     $items = '';
     if (!$accounts) {return $this;}
     foreach ($accounts as $account) {
       $platform = $account['platform'];
       $iconClass = 'icon-social-' . $platform;
-      $items .= bp_get_theme_icon('social-' . $platform,'nav-bar__social-icon');
+      $icon = bp_get_theme_icon('social-' . $platform,'nav-bar__social-icon-container');
+      $link = $account['link'];
+      $items .= "
+        <a href='$link' class='nav-bar__social-icon'>$icon</a>
+      ";
     }
     $this->social = "
       <div class='nav-bar__social'>
@@ -43,12 +48,13 @@ class NavBar extends Part {
   }
 
   function build() {
+    $this->buildParts();
     return "
-      <div class='nav-bar'>
+      <div class='nav-bar $this->class'>
         <div class='nav-bar__menu'>
           $this->menuItems
-          $this->social
         </div>
+        $this->social
       </div>
     ";
   }

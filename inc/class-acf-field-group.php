@@ -13,7 +13,7 @@ class Group extends acf\Field {
 
   function init() {
     $this->setType('group');
-    $this->setLayout('row');
+    $this->setLayout('block');
     $this->addPrefix();
   }
 

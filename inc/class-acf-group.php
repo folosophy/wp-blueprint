@@ -6,6 +6,7 @@ use \Blueprint as bp;
 class Group {
 
   use Builder;
+  use bp\Chain;
   use FieldBuilder;
 
   protected $fields = array();
@@ -16,6 +17,7 @@ class Group {
   protected $groupName;
   public $groupTitle;
   protected $prefix;
+  protected $isGroup = true;
 
   function __construct($name,$parentInstance=null) {
     $this->setName($name);
@@ -25,7 +27,7 @@ class Group {
       ->setLabelPlacement('left')
       ->setOrder('middle');
       //setPosition('low');
-    if ($parentInstance) {$this->chainInit($parentInstance);}
+    if ($parentInstance) {$this->setParentInstance($this);}
     add_action('init',array($this,'register'));
   }
 
@@ -52,7 +54,9 @@ class Group {
       // TODO: other specifics
     }
     //
-    if (is_string($val))
+    if (is_string($val)) {
+      $val = array($val);
+    }
     $location = (new Location($this))
       ->addLocation($val,$param,$operator);
     $this->location = $location;
@@ -64,9 +68,10 @@ class Group {
     // TODO: Group Collection that sets order and numeric place within order set
     if (is_string($order)) {
       switch ($order) {
-        case 'high'   : $order = 1; break;
-        case 'middle' : $order = 5; break;
-        case 'low'    : $order = 10; break;
+        case 'top'    : $order = 0; break;
+        case 'high'   : $order = 10; break;
+        case 'middle' : $order = 20; break;
+        case 'low'    : $order = 30; break;
         case 'bottom' : $order = 99999; break;
         default: $order = 10;
       }
@@ -112,18 +117,26 @@ class Group {
     return $this;
   }
 
+  function dumpFields() {
+    var_dump($this->fields);
+    return $this;
+  }
+
   function register() {
+    // Hide labels for single-field groups
+    if (count($this->fields) == 1) {
+      $this->fields[0]->addClass('nolabel');
+    }
     if (method_exists($this,'preRegister')) {
       $this->preRegister();
     }
-    $this->group['location'] = $this->location->getLocation();
+    if ($this->location) {
+      $this->group['location'] = $this->location->getLocation();
+    }
     $this->group['fields'] = array();
     foreach ($this->fields as $field) {
       if (is_object($field)) {$field = $field->getField();}
       array_push($this->group['fields'],$field);
-    }
-    if ($this->name == 'about') {
-      //diedump($this->group['name']);
     }
     acf_add_local_field_group(
       $this->group

@@ -16,6 +16,7 @@ class NavMain {
   protected $brand;
   protected $button;
   protected $name;
+  protected $social;
   protected $type = 'main';
 
   function __construct() {
@@ -57,12 +58,11 @@ class NavMain {
   }
 
   function setBrand() {
-    if ($this->logos) {
-      $name = '';
-    }
+    $home_link = get_bloginfo('url');
     $this->brand = "
-      $this->logos
-      $name
+      <a class='nav-main__brand' href='$home_link'>
+        $this->logos
+      </a>
     ";
     return $this;
   }
@@ -74,21 +74,57 @@ class NavMain {
     return $this;
   }
 
+  // TODO: create class or function for generating social
+  function addSocial() {
+    $accounts = get_field('main_social','option');
+    if (!$accounts) {return $this;}
+    $items = '';
+    if (!$accounts) {return $this;}
+    foreach ($accounts as $account) {
+      $platform = $account['platform'];
+      $iconClass = 'icon-social-' . $platform;
+      $icon = bp_get_theme_icon('social-' . $platform,'nav-main__social-icon-container');
+      $link = $account['link'];
+      $items .= "
+        <a href='$link' class='nav-main__social-icon'>$icon</a>
+      ";
+    }
+    $this->social = "
+      <div class='nav-bar__social'>
+        $items
+      </div>
+    ";
+    return $this;
+  }
+
   function build() {
     $this->setBrand();
     return "
       $this->navBar
       <nav class='$this->navClass'>
+
         <div class='nav-main__wrap'>
-          <div class='nav-main__brand'>
-            $this->brand
-          </div>
+          $this->brand
+
           <div class='menu-mobile'>
             <ul class='menu-main'>
               $this->menuItems
               $this->button
             </ul>
+            <div class='menu-mobile__exit'></div>
           </div>
+
+          $this->social
+
+          <div class='menu-main__toggle'>
+            <span class='menu-main__toggle__label'>MENU</span>
+            <div class='menu-main__toggle__icon'>
+              <div class='menu-main__toggle__top'></div>
+              <div class='menu-main__toggle__mid'></div>
+              <div class='menu-main__toggle__bot'></div>
+            </div>
+          </div>
+
         </div>
       </nav>
     ";

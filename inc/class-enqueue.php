@@ -28,6 +28,7 @@ class Enqueue {
       $this->setVersion();
       $this->setDependencies();
     }
+    $this->addAction();
   }
 
   function addAction($action=null) {

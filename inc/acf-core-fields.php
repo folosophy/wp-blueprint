@@ -4,6 +4,7 @@ namespace Blueprint\Acf;
 
 $featured_media = (new Group('featured_media'))
   ->setPosition('high')
+  ->setLabelPlacement('top')
   // Featured Media Group
   ->addGroup('featured_media')
     ->setLayout('row')
@@ -13,9 +14,20 @@ $featured_media = (new Group('featured_media'))
     ->addTip('Set the Featured Image on the right.',true)
       ->setLogic('format','image')
       ->end()
-    ->addSelect('video_source')
-      ->setChoices(array('youtube','vimeo'))
+    ->addClone('video','field_video',true)
+      ->setDisplay('group')
       ->setLogic('format','video')
+      ->end()
+    ->endGroup()
+  ->setLocation(apply_filters('bp_featured_media_location',array('post')));
+
+// Video
+
+$video = (new Group('video'))
+  ->addGroup('video')
+    ->addSelect('source')
+      ->setChoices(array('youtube'=>'YouTube','vimeo'))
+      ->setDefaultValue('youtube')
       ->endSelect()
     // YouTube ID
     ->addText('youtube_id',true)
@@ -23,8 +35,7 @@ $featured_media = (new Group('featured_media'))
       ->setPrepend('youtube.com/watch?v=')
       ->setPlaceholder('T-YqcuatM6I')
       ->setLogic()
-        ->addCondition('video_source','youtube')
-        ->andCondition('format','video')
+        ->addCondition('source','youtube')
         ->endLogic()
       ->endText()
     // Video ID
@@ -33,18 +44,15 @@ $featured_media = (new Group('featured_media'))
       ->setPrepend('vimeo.com/')
       ->setPlaceholder('227138298')
       ->setLogic()
-        ->addCondition('video_source','vimeo')
-        ->andCondition('format','video')
+        ->addCondition('source','vimeo')
         ->endLogic()
       ->endText()
-    ->endGroup()
-  ->setLabelPlacement('top')
-  ->setLocation(apply_filters('bp_featured_media_location','post'));
+    ->endGroup();
 
 // Hero
 
 $hero = (new Group('hero'))
-  ->setOrder('high')
+  ->setOrder('top')
   ->addGroup('hero')
     ->addSelect('content_type')
       ->setChoices(array(
@@ -56,7 +64,7 @@ $hero = (new Group('hero'))
     // Headline
     ->addText('headline',true)
       ->setLogic()
-        ->addCondition('content_type','manual')
+        ->addCondition('content_type','post_select')
         ->endLogic()
       ->end()
     ->addPostObject('post_select',true)
@@ -73,7 +81,6 @@ $hero = (new Group('hero'))
 
 $main_social = (new Group('main_social'))
   ->setLocation('site_options','options_page')
-  ->setLayout('block')
   ->addRepeater('main_social')
     ->setButtonLabel('Add an account')
     ->setLabel('Accounts')
@@ -91,5 +98,36 @@ $main_social = (new Group('main_social'))
 $text_elements = (new Group('text_elements'))
   ->addText('headline')
   ->setLocation('post');
+
+$form_elements = (new Group('personal_info'))
+  ->addText('first_name')
+  ->addText('middle_name',true)
+    ->setRequired(0)
+    ->end()
+  ->addText('last_name')
+  ->addText('title')
+  ->addText('company')
+  ->addTextArea('bio')
+  ->setLocation('blog');
+
+// Events
+// TODO: MTF Activate with events class, etc
+
+$event_info = (new Group('event_info'))
+  ->addDateTime('start_date',true)
+    ->setLabel('Starts')->end()
+  ->addDateTime('end_date',true)
+    ->setLabel('ends')->end()
+  ->setLocation('event')
+  ->setLayout('table')
+  ->setLabelPlacement('left');
+
+$intro = (new Group('intro'))
+  ->addGroup('intro')
+    ->addHeadline()
+    ->addCopy()
+    ->end()
+  ->setLocation('page')
+  ->setOrder('high');
 
 do_action('bp/acf/after_core');
