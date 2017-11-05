@@ -19,7 +19,7 @@ class Group {
   protected $prefix;
   protected $isGroup = true;
 
-  function __construct($name,$parentInstance=null) {
+  function __construct($name,$parent=null) {
     $this->setName($name);
     $this->setTitle();
     $this->group['active'] = 1;
@@ -27,7 +27,7 @@ class Group {
       ->setLabelPlacement('left')
       ->setOrder('middle');
       //setPosition('low');
-    if ($parentInstance) {$this->setParentInstance($this);}
+    if ($parent) {$this->setparent($this);}
     add_action('init',array($this,'register'));
   }
 

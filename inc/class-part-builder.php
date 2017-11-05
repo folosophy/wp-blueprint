@@ -67,18 +67,16 @@ trait Builder {
     return $this;
   }
 
-  function addCopy($copy=null) {
+  function addCopy($copy=null,$chain=false) {
     $part = (new Copy('copy',$this))
       ->setCopy($copy);
-    $this->addPart($part);
-    return $this;
+    return $this->addPart($part,$chain);
   }
 
-  function addHeadline($headline=null) {
+  function addHeadline($headline=null,$chain=false) {
     $part = (new Headline('headline',$this))
       ->setHeadline($headline);
-    $this->addPart($part);
-    return $this;
+    return $this->addPart($part,$chain);
   }
 
   function addHtml($html) {
@@ -135,6 +133,11 @@ trait Builder {
 
   function setWrap($wrap) {
     $this->class .= 'wrap-' . $wrap;
+    return $this;
+  }
+
+  function dumpField() {
+    var_dump($this->field);
     return $this;
   }
 

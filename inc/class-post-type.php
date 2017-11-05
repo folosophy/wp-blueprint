@@ -16,10 +16,11 @@ class PostType {
   protected $rewrite = array();
   protected $tags;
 
-  function __construct($postType) {
+  function __construct($postType,$plural=null) {
     $this->postType = $postType;
     $this->setPublic(true);
     $this->setSupports();
+    if ($plural) {$this->setPluralName($plural);}
     add_action('init',array($this,'register'));
   }
 
@@ -114,7 +115,8 @@ class PostType {
   }
 
   function setPluralName($name=null) {
-    if (!$name) {$name = ucwords($this->postType);}
+    if (!$name) {$name = $this->postType;}
+    $name = ucwords($name);
     $this->name = $name;
     $this->labels['name'] = $name;
     $this->label = $name;

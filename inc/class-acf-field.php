@@ -16,8 +16,8 @@ class Field {
   protected $logic;
   protected $prefix;
 
-  function __construct($key,$parentInstance) {
-    $this->parentInstance = $parentInstance;
+  function __construct($key,$parent) {
+    $this->parent = $parent;
     $this->setName($key);
     $this->setPrefix();
     $this->setLabel();
@@ -39,8 +39,8 @@ class Field {
   }
 
   function getParentKey() {
-    if (is_subclass_of($this->parentInstance,'Blueprint\Acf\Field')) {
-      return $this->parentInstance->getKey();
+    if (is_subclass_of($this->parent,'Blueprint\Acf\Field')) {
+      return $this->parent->getKey();
     } else {
       return null;
     }
@@ -53,7 +53,7 @@ class Field {
   function setLogic($key=null,$value=null,$operator='==') {
     $logic = (new acf\Logic($this));
     $this->logic = $logic;
-    if ($key && $value) {
+    if ($key && $value !== null) {
       $logic->addCondition($key,$value,$operator);
       return $this;
     } else {
@@ -62,7 +62,7 @@ class Field {
   }
 
   protected function setPrefix() {
-    $parent = $this->parentInstance;
+    $parent = $this->parent;
     if (is_subclass_of($parent,'Blueprint\Acf\Field')) {
       $this->prefix = $parent->getKey() . '_';
     } else {

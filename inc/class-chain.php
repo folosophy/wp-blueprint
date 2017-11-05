@@ -4,31 +4,27 @@ namespace Blueprint;
 
 trait Chain {
 
-  protected $parentInstance;
+  protected $parent;
 
-  function chainInit($parentInstance) {
-    $this->setParentInstance($parentInstance);
+  function chainInit($parent) {
+    $this->setParent($parent);
   }
 
   function getParent() {
-    return $this->parentInstance;
+    return $this->parent;
   }
 
-  function setParent($parentInstance) {
-    $this->parentInstance = $parentInstance;
+  function setParent($parent) {
+    $this->parent = $parent;
     return $this;
   }
 
-  function setParentInstance($parentInstance) {
-    $this->parentInstance = $parentInstance;
-  }
-
   function endChain() {
-    return $this->parentInstance;
+    return $this->parent;
   }
 
   function end() {
-    return $this->parentInstance;
+    return $this->parent;
   }
 
   function dumpThis() {
@@ -37,7 +33,7 @@ trait Chain {
 
   function chain($obj,$chain=false) {
     if (is_object($obj)) {
-      $obj->setParentInstance($this);
+      $obj->setparent($this);
     } else {wp_die('chain expects object.');}
     if (!$chain) {return $this;}
     else {return $obj;}

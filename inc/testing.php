@@ -199,23 +199,7 @@ add_action('acf/render_field',function($field) {
   return $field;
 });
 
-// Vars
 
-function bp_set_var($key,$value) {
-  $GLOBALS['wp_blueprint'][$key] = $value;
-}
-// TODO: accept key and fallback arrays
-function bp_var($key,$fallback_value=null) {
-  if (!isset($GLOBALS['wp_blueprint'])) {
-    $GLOBALS['wp_blueprint'] = array();
-  }
-  if (isset($GLOBALS['wp_blueprint'][$key])) {
-    return $GLOBALS['wp_blueprint'][$key];
-  } else {
-    if ($fallback_value !== null) {return $fallback_value;}
-    else {return false;}
-  }
-}
 
 // Excerpt Length
 
@@ -237,4 +221,25 @@ add_action('admin_menu','remove_default_post_type');
 
 function remove_default_post_type() {
 	remove_menu_page('edit.php');
+}
+
+// VARS
+
+// Vars
+
+function bp_set_var($key,$value) {
+  $GLOBALS['wp_blueprint'][$key] = $value;
+}
+
+// TODO: accept key and fallback arrays
+function bp_var($key,$fallback_value=null) {
+  if (!isset($GLOBALS['wp_blueprint'])) {
+    $GLOBALS['wp_blueprint'] = array();
+  }
+  if (isset($GLOBALS['wp_blueprint'][$key])) {
+    return $GLOBALS['wp_blueprint'][$key];
+  } else {
+    if ($fallback_value !== null) {return $fallback_value;}
+    else {return false;}
+  }
 }

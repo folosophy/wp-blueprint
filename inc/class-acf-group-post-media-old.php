@@ -10,11 +10,11 @@ class PostMedia extends acf\Group {
   protected $mediaFormatKey;
   protected $videoSourceKey;
 
-  function __construct($name=null,$parentInstance=null) {
+  function __construct($name=null,$parent=null) {
     if ($name == 'post') {$name = '';}
     else {$name = $name . '_';}
     $name = $name . 'post_media';
-    parent::__construct($name,$parentInstance=null);
+    parent::__construct($name,$parent=null);
     $this->setLabelPlacement('left');
     $this->setName($name);
     $this->setTitle('Media');

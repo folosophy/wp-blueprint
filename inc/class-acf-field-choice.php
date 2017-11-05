@@ -17,7 +17,7 @@ class Choice extends acf\Field {
     if (is_string($choices)) {
       $choices = array($choices);
       //TODO: Rethink
-      //if (count($choices) == 1) {$this->parentInstance->hideGroup();}
+      //if (count($choices) == 1) {$this->parent->hideGroup();}
     }
     $formatted_choices = array();
     foreach ($choices as $key => $val) {

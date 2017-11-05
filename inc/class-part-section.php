@@ -15,6 +15,7 @@ class Section extends Part {
     $this->setId();
     $this->setField();
     $this->setTag('section');
+    //diedump($this->field);
   }
 
   function setBody($body=null) {

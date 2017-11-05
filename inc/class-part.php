@@ -18,7 +18,9 @@ class Part {
     $this->title = ucwords($this->name);
     if ($parent) {
       $this->setParent($parent);
-      $this->field = $parent->getField();
+      if (isset($this->parent) && method_exists($parent,'getField')) {
+        $this->field = $parent->getField();
+      }
     }
     if (method_exists($this,'init')) {$this->init();}
   }

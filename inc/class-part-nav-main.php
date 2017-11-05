@@ -11,6 +11,7 @@ class NavMain {
   protected $menu;
   protected $menuButton;
   protected $menuItems;
+  protected $menuMain;
   protected $navBar;
   protected $navClass;
   protected $brand;
@@ -36,11 +37,21 @@ class NavMain {
     return $this;
   }
 
+  function setMainMenu() {
+    if (!isset($this->menuMain)) {
+      $this->menuMain = (new MenuMain('menu-main',$this));
+      return $this->menuMain;
+    } else {wp_die('Main Menu already set.');}
+  }
+
   function addMenuItems($items) {
     foreach ($items as $item) {
       if (is_int($item)) {$item = get_post($item);}
       elseif (is_string($item)) {$item  = get_page_by_path($item);}
-      $this->menuItems .= "
+      $children = get_posts(array('post_parent'=>10,'post_type'=>'page'));
+      if ($children) {}
+      // Build item
+      $menuItem = "
         <li class='menu-main__item'>
           <div class='menu-main__item__title'>
             $item->post_title
@@ -50,6 +61,12 @@ class NavMain {
     }
     return $this;
   }
+
+  function addMainPages() {
+
+  }
+
+  // TODO: Create menu item and
 
   function setName($name=null) {
     if (!$name) {$name = \get_bloginfo('name');}
@@ -99,21 +116,18 @@ class NavMain {
 
   function build() {
     $this->setBrand();
+    // Main Menu
+    if (!$this->menuMain) {
+      $this->setMainMenu();
+    }
+    $menuMain = $this->menuMain->build();
     return "
       $this->navBar
       <nav class='$this->navClass'>
 
         <div class='nav-main__wrap'>
           $this->brand
-
-          <div class='menu-mobile'>
-            <ul class='menu-main'>
-              $this->menuItems
-              $this->button
-            </ul>
-            <div class='menu-mobile__exit'></div>
-          </div>
-
+          $menuMain
           $this->social
 
           <div class='menu-main__toggle'>
@@ -127,6 +141,65 @@ class NavMain {
 
         </div>
       </nav>
+    ";
+  }
+
+}
+
+class SubMenu {
+
+
+
+}
+
+class MenuMain extends Part {
+
+  protected $button;
+  protected $items;
+
+  function init() {
+    $this->setClass('menu-mobile');
+    $this->addMainPages();
+  }
+
+  function addMenuButton($label,$link) {
+    if (!isset($this->button)) {
+      $this->button = "
+        <a class='menu-main__item' href='$link'>
+          <div class='menu-main__button'>$label</div>
+          <div class='menu-main__item__title menu-main__button__title'>
+            $label
+          </div>
+        </a>
+      ";
+    } else {wp_die('Only one menu button allowed.');}
+    return $this;
+  }
+
+  function addMainPages() {
+    $pages = bp_get_main_pages();
+    foreach ($pages as $item) {
+      // Build item
+      $link = get_the_permalink($item->ID);
+      $menuItem = "
+        <a class='menu-main__item' href='$link'>
+          <div class='menu-main__item__title'>
+            $item->post_title
+          </div>
+        </a>
+      ";
+      $this->items .= $menuItem;
+    }
+    return $this;
+  }
+
+  function buildInit() {
+    if ($this->button) {$this->items .= $this->button;}
+    $this->part = "
+      <div class='menu-main'>
+        $this->items
+      </div>
+      <div class='menu-mobile__exit'></div>
     ";
   }
 

@@ -40,12 +40,12 @@ class Blueprint {
     bp_require('inc/autoload',BP);
     bp_require('inc/menus',BP);
     bp_require('inc/testing',BP);
-    bp_glob_require('inc/theme-core*',BP);
     if (is_admin()) {bp_glob_require('inc/admin-core*',BP);}
     else {
       bp_glob_require('inc/public-core*',BP);
     }
     bp_glob_require('inc/core*',BP);
+    bp_glob_require('inc/theme-core*',BP);
     // TODO: require actions automatically
     bp_require('inc/acf-core-fields',BP);
     add_action('init',function() {

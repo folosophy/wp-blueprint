@@ -10,9 +10,9 @@ class Logic {
   protected $conditions = array();
   protected $prefix = '';
 
-  function __construct($parentInstance) {
-    $this->parentInstance = $parentInstance;
-    $this->prefix = $parentInstance->getPrefix();
+  function __construct($parent) {
+    $this->parent = $parent;
+    $this->prefix = $parent->getPrefix();
   }
 
   function addCondition($field,$value,$operator='==') {
