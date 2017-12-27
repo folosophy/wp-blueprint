@@ -13,15 +13,25 @@ class PostGrid extends Grid {
   protected function init() {
     $this->setCols(bp_var('post_grid_columns',3));
     $this->setArgs();
-    $this->setNotIn();
   }
 
-  function setArgs() {
-    if (!$this->numPosts) {$this->numPosts = $this->cols;}
-    $args  = array(
-      'post_type'   => $this->postType,
-      'numberposts' => $this->numPosts
-    );
+  function getArgs() {
+    return $this->args;
+  }
+
+  function setArg($key,$val) {
+    $this->args[$key] = $val;
+    return $this;
+  }
+
+  function setArgs($args=null) {
+    if (!$args) {
+      if (!$this->numPosts) {$this->numPosts = $this->cols;}
+      $args  = array(
+        'post_type'   => $this->postType,
+        'numberposts' => $this->numPosts
+      );
+    }
     $this->args= $args;
     return $this;
   }
@@ -47,14 +57,21 @@ class PostGrid extends Grid {
     $posts = get_posts($this->args); global $post;
 
     foreach ($posts as $post) : setup_postdata($post);
-      $card = (new Card())->build();
-      $this->addItem($card);
+      // TODO: Include post object in any files that need it?
+      $po = get_post_type_object(get_post_type());
+      if (isset($po->card)) {
+        $class = $po->card;
+        $card = (new $class());
+      } else {
+        $card = new Card();
+      }
+      $this->addItem($card->build());
     endforeach; wp_reset_postdata();
 
   }
 
   function setNotIn($ids = null) {
-    if (!$ids) {$ids = bp_get_post_log();}
+    if (!$ids) {$ids = bp_var('post_log');}
     if ($ids) {$this->args['post__not_in'] = $ids;}
     $this->args['post__not_in'] = $ids;
     return $this;
@@ -80,6 +97,7 @@ class PostGrid extends Grid {
   }
 
   function build() {
+    if (!isset($this->args['post__not_in'])) {$this->setNotIn();}
     $this->setItems();
     return parent::build();
   }

@@ -14,7 +14,7 @@ class Taxonomy {
   function __construct($taxonomy,$postType=null) {
     $this->setTaxonomy($taxonomy);
     $this->setHierarchical(true);
-    add_action('init',array($this,'register'));
+    add_action('init',array($this,'register'),0);
   }
 
   function setLabel($label) {

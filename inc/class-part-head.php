@@ -2,26 +2,33 @@
 
 namespace Blueprint\Part;
 
-class Head  {
+class Head extends Part  {
 
   private $wpHead;
   protected $bodyClass;
   private $charset;
   public $build;
 
-  function __construct() {
-    $this->setBodyType();
-    $this->setInfo();
-    $this->setWpHead();
-    $this->setHead();
+  function init() {
+    wp_reset_query();
+    // global $post;
+    // $this->post = $post;
+    $this->setTag('head');
+    // $this->setInfo();
+    // $this->setWpHead();
+    // $this->setHead();
   }
 
-  function setBodyType() {
-    if (is_single()) {$type = 'single';}
-    elseif (is_page()) {$type = 'page';}
-    $this->bodyClass .= ' body-' . $type;
-    return $this;
-  }
+  // function setBodyType() {
+  //   if (is_single()) {$type = 'single';}
+  //   elseif (is_page()) {
+  //     $this->bodyClass .= 'page-' . $this->post->post_name;
+  //     $type = 'page';
+  //   }
+  //   else {$type = 'index';}
+  //   $this->bodyClass .= ' body-' . $type;
+  //   return $this;
+  // }
 
   private function setInfo() {
     $this->siteName = get_bloginfo('name');
@@ -29,29 +36,28 @@ class Head  {
     $this->charset = get_bloginfo('charset');
   }
 
-  private function setWpHead() {
+  private function getWpHead() {
     ob_start();
     wp_head();
     $this->wpHead = ob_get_clean();
+    return $this->wpHead;
   }
 
-  private function setHead() {
-    $this->build = "
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset='$this->charset'>
-          <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
-          <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'>
-          <title>$this->siteName | $this->pageTitle</title>
-          $this->wpHead
-        </head>
-        <body class='$this->bodyClass'>
+  protected function getMeta() {
+    $site_name = get_bloginfo('name');
+    $title     = get_the_title();
+    $this->meta = "
+      <meta charset=''>
+      <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+      <meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=no'>
+      <title> $site_name | $title</title>
     ";
+    return $this->meta;
   }
 
-  public function render() {
-    echo $this->build;
+  function buildInit() {
+    $this->addHtml($this->getWpHead());
+    $this->addHtml($this->getMeta());
   }
 
 }

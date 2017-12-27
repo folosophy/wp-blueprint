@@ -1,8 +1,8 @@
 <?php
 
-namespace Blueprint\Template;
+namespace Blueprint;
 
-class Index extends Template {
+class Index {
 
   protected $template;
 
@@ -17,7 +17,14 @@ class Index extends Template {
     global $post;
     if (is_front_page()) {$this->setTemplate('page','home');}
     elseif (is_page()) {$this->setTemplate('page',$post->post_name);}
-    elseif (is_single()) {$this->setTemplate('single',$this->postType);}
+    elseif (is_single()) {
+      $this->setTemplate('single',get_post_type());
+      if (!$this->template) {
+        $template = (new template\Single())
+          ->render();
+      }
+    }
+
 
     if ($this->template) {echo $this->template;}
     else {}
@@ -28,6 +35,7 @@ class Index extends Template {
     ob_start();
     get_template_part("parts/$base",$part);
     $this->template = ob_get_clean();
+    return $this->template;
   }
 
 }

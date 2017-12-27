@@ -10,10 +10,10 @@ class Copy extends Part {
     $this->setTag('p');
   }
 
-  function setCopy($copy) {
+  function setCopy($copy=null) {
     // TODO: Conditional lorem ipsum when testing mode is on
     if (!$copy) {
-      if ($this->field) {$copy = $this->field['copy'];}
+      if (!empty($this->field['copy'])) {$copy = $this->field['copy'];}
       elseif (is_string($this->field)) {$copy = $this->field;}
       else {$copy = 'Nulla facilisi. Suspendisse nisl elit, rhoncus eget, elementum ac, condimentum eget, diam. Pellentesque auctor neque nec urna. Morbi nec metus. Curabitur ullamcorper ultricies nisi.';}
     }

@@ -27,7 +27,7 @@ class Group {
       ->setLabelPlacement('left')
       ->setOrder('middle');
       //setPosition('low');
-    if ($parent) {$this->setparent($this);}
+    if ($parent) {$this->setParent($parent);}
     add_action('init',array($this,'register'));
   }
 
@@ -138,6 +138,7 @@ class Group {
       if (is_object($field)) {$field = $field->getField();}
       array_push($this->group['fields'],$field);
     }
+    // if ($this->name == 'hero') {diedump($this->group);}
     acf_add_local_field_group(
       $this->group
     );

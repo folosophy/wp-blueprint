@@ -24,3 +24,11 @@ function bp_get_theme_icon($path,$class) {
   $url = get_template_directory_uri() . '/assets/img/icon-' . $path . '.svg';
   return "<img class='$class ps-lazy ps-unloaded' src='$url' ps-src='$url' />";
 }
+
+function bp_get_avatar($user_id=null,$class=null) {
+  $url = get_avatar_url($user_id,array('default'=>'mystery'));
+  $img = new Image();
+  if ($class) {$img->setClass($class);}
+  $img->setSrc($url);
+  return $img->build();
+}

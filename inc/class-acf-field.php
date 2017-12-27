@@ -53,7 +53,7 @@ class Field {
   function setLogic($key=null,$value=null,$operator='==') {
     $logic = (new acf\Logic($this));
     $this->logic = $logic;
-    if ($key && $value !== null) {
+    if (isset($key)) {
       $logic->addCondition($key,$value,$operator);
       return $this;
     } else {
@@ -142,9 +142,6 @@ class Field {
   function getField() {
     if ($this->logic) {
       $this->field['conditional_logic'] = $this->logic->getConditions();
-    }
-    if ($this->field['name'] == 'headline') {
-      //diedump($this->field['key']);
     }
     return $this->field;
   }

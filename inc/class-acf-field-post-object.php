@@ -21,8 +21,8 @@ class PostObject extends acf\Field {
     return $this;
   }
 
-  function setMultiple($int = 0) {
-    $this->field['multiple'] = 0;
+  function setMultiple($multiple = 0) {
+    $this->field['multiple'] = $multiple;
     return $this;
   }
 

@@ -41,9 +41,7 @@ class Blueprint {
     bp_require('inc/menus',BP);
     bp_require('inc/testing',BP);
     if (is_admin()) {bp_glob_require('inc/admin-core*',BP);}
-    else {
-      bp_glob_require('inc/public-core*',BP);
-    }
+    bp_glob_require('inc/public-core*',BP);
     bp_glob_require('inc/core*',BP);
     bp_glob_require('inc/theme-core*',BP);
     // TODO: require actions automatically
@@ -51,6 +49,7 @@ class Blueprint {
     add_action('init',function() {
       bp_glob_require('inc/fields*');
     });
+
   }
 
 }
@@ -81,4 +80,12 @@ function bp_require($file,$plugin=false) {
   else {$base = WP_PLUGIN_DIR . '/' . $plugin;}
   $file = $base . '/' . $file . '.php';
   require($file);
+}
+
+function bp_log_post($id=null) {
+  if (!$id) {$id = get_the_id();}
+  $post_log = bp_var('post_log');
+  if (!is_array($post_log)) {$post_log = array();}
+  array_push($post_log,$id);
+  bp_set_var('post_log',$post_log);
 }

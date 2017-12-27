@@ -9,7 +9,7 @@ class Image extends acf\Field {
     $this->setType('image');
     $this
       ->setReturnFormat('id')
-      ->setLibrary();
+      ->setLibrary('post');
   }
 
   function setReturnFormat($format='image') {
@@ -18,8 +18,11 @@ class Image extends acf\Field {
   }
 
   function setLibrary($library='post') {
-    if ($library == 'post') {$library = 'uploadedTo';}
-    else {$library = 'all';}
+    switch ($library) {
+      case 'post' : $library = 'uploadedTo'; break;
+      case 'all'  : $library = 'all'; break;
+      default     : $library = 'uploadedTo';
+    }
     $this->field['library'] = $library;
     return $this;
   }

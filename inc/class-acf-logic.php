@@ -8,15 +8,25 @@ class Logic {
   use bp\Chain;
 
   protected $conditions = array();
-  protected $prefix = '';
+  protected $prefix;
 
   function __construct($parent) {
     $this->parent = $parent;
-    $this->prefix = $parent->getPrefix();
+    $this->setPrefix(true);
+  }
+
+  function setPrefix() {
+    $this->prefix = $this->parent->getPrefix();
+    // Setup prefix
+    $s = strrpos($this->prefix,$this->parent->getName() . '_');
+    if ($s) {$this->prefix = substr($this->prefix,0,$s);}
+    return $this;
   }
 
   function addCondition($field,$value,$operator='==') {
-    $field = 'field_' . str_replace('field_','',$field);
+    $field = str_replace('field_','',$field);
+    if ($this->prefix) {$field = $this->prefix . $field;}
+    else {$field = 'field_' . $field;}
     array_push(
       $this->conditions,
       array(

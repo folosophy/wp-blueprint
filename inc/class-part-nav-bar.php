@@ -12,10 +12,11 @@ class NavBar extends Part {
   }
 
   function addMenuItem($label,$link=null) {
+    if (is_int($link)) {$link = get_the_permalink($link);}
     $item = "
-      <div class='nav-bar__menu-item'>
+      <a class='nav-bar__menu-item' href='$link'>
         $label
-      </div>
+      </a>
     ";
     $this->menuItems .= $item;
     return $this;

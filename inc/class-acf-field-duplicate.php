@@ -34,4 +34,10 @@ class Duplicate extends Field {
     parent::setKey($key);
   }
 
+  function setRequired($required=1) {
+    parent::setRequired();
+    $this->setDisplay('group');
+    return $this;
+  }
+
 }

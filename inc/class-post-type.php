@@ -18,6 +18,7 @@ class PostType {
 
   function __construct($postType,$plural=null) {
     $this->postType = $postType;
+    $this->setLabel($postType);
     $this->setPublic(true);
     $this->setSupports();
     if ($plural) {$this->setPluralName($plural);}
@@ -46,10 +47,16 @@ class PostType {
     return $this;
   }
 
+  function setCard($card) {
+    if (!is_string($card)) {wp_die('PostType setCard expects string');}
+    $this->args['card'] = $card;
+    return $this;
+  }
+
   function setCategory() {
-    $category = (new Taxonomy($this->postType . '_category'))
-      ->setHierarchical(true)
-      ->setPostType($this->postType);
+    $tax = (new Taxonomy($this->postType . '_category',$this->postType))
+      ->setPostType($this->postType)
+      ->setHierarchical(true);
     return $this;
   }
 
@@ -99,6 +106,7 @@ class PostType {
   function setName($plural,$singular) {
     $plural = ucwords(str_replace('_',' ',$plural));
     $singular = ucwords(str_replace('_',' ',$singular));
+    $this->setLabel($plural);
     $this->labels['name'] = $plural;
     $this->labels['singular_name'] = $singular;
     return $this;
@@ -154,12 +162,12 @@ class PostType {
     return $this;
   }
 
-  function setTaxonomies($taxes) {
-    $this->args['taxonomies']   = $taxes;
-    $this->args['hierarchical'] = true;
-    $this->args['show_ui']      = true;
-    return $this;
-  }
+  // function setTaxonomies($taxes) {
+  //   $this->args['taxonomies']   = $taxes;
+  //   $this->args['hierarchical'] = true;
+  //   $this->args['show_ui']      = true;
+  //   return $this;
+  // }
 
   function setSlug($slug=null) {
     if (!$slug) {$slug = $this->name;}
@@ -168,6 +176,7 @@ class PostType {
   }
 
   function register() {
+    $this->args['label'] = $this->label;
     $this->args['labels'] = $this->labels;
     $this->args['rewrite'] = $this->rewrite;
     register_post_type($this->postType,$this->args);

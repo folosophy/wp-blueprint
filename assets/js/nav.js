@@ -47,7 +47,7 @@ function fsyAnchorScroll() {
         scrollTop: $target.offset().top
       },500);
     } else {
-      document.location.href = WPURLS.siteurl + '/' + $that.attr('href');
+      document.location.href = SITEURL + '/' + $that.attr('href');
     }
   });
 
@@ -81,5 +81,14 @@ class Nav {
 }
 
 var nav = new Nav();
+
+// $(window).scroll(function() {
+//   var st = $(window).scrollTop();
+//   if (st > 0) {
+//     $('.hero-primary').addClass('hero--is-hidden');
+//   } else {
+//     $('.hero-primary').removeClass('hero--is-hidden');
+//   }
+// });
 
 }); // End jQuery

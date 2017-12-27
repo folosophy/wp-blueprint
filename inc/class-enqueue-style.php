@@ -1,10 +1,11 @@
 <?php
 
-namespace Blueprint;
+namespace Blueprint\Enqueue;
 
-class EnqueueStyle extends Enqueue {
+class Style extends Enqueue {
 
   function enqueue() {
+    parent::enqueue();
     wp_enqueue_style(
       $this->name,
       $this->src,

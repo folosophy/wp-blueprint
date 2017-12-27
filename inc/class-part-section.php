@@ -23,20 +23,26 @@ class Section extends Part {
     return $this;
   }
 
-  function setClass($class) {
+  function setClass($class=null) {
     $this->class = $class;
     return $this;
   }
 
   function setId($id=null) {
     if (!$id) {$id = 'section-' . $this->name;}
-    $this->id .= $id;
+    $this->atts['id'] = $id;
+    return $this;
   }
 
   function setTheme($theme='trans') {
     $theme = 'theme-' . $theme;
     $this->theme = $theme;
     return $this;
+  }
+
+  function buildInit() {
+    if (!$this->theme) {$this->setTheme();}
+    $this->addClass($this->theme);
   }
 
 }

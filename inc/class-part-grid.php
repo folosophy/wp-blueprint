@@ -36,7 +36,6 @@ class Grid extends Part {
     return "
       <div class='grid'>
         $this->items
-        hello
       </div>
     ";
   }

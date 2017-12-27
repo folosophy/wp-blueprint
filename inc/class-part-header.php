@@ -1,11 +1,9 @@
 <?php
 
-namespace Blueprint;
-use Blueprint\Part as part;
+namespace Blueprint\Part;
+use \Blueprint as bp;
 
-class Header {
-
-  use Chain;
+class Header extends Part {
 
   protected $siteName;
   protected $siteUrl;
@@ -18,14 +16,14 @@ class Header {
     $this->setMeta();
   }
 
-  function setNav($chain=false) {
-    $nav = (new Part\NavMain());
+  function setNav($name=null,$chain=true) {
+    $nav = (new NavMain());
     $this->nav = $nav;
     return $this->chain($nav,$chain);
   }
 
   function setNavbar() {
-    $navbar = (new Part\NavBar());
+    $navbar = (new NavBar());
     $this->navBar = $navbar;
     return $this->chain($navbar,true);
   }

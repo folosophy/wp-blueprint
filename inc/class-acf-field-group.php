@@ -13,7 +13,11 @@ class Group extends acf\Field {
 
   function init() {
     $this->setType('group');
-    $this->setLayout('block');
+    if (is_object($this->parent) && get_parent_class($this->parent) == "Blueprint\\Acf\\Field") {
+      $this->setLayout('block');
+    } else {
+      $this->setLayout('row');
+    }
     $this->addPrefix();
   }
 
@@ -27,7 +31,9 @@ class Group extends acf\Field {
       $field = $field->getField();
       array_push($this->field['sub_fields'],$field);
     }
-    return $this->field;
+    $field = parent::getField();
+    $field['sub_fields'] = $this->field['sub_fields'];
+    return $field;
   }
 
   function endGroup() {

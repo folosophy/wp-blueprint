@@ -6,20 +6,30 @@ use \Blueprint\Acf\Field as field;
 
 trait FieldBuilder {
 
+  function addAccordion($name,$chain=false) {
+    $label = $name;
+    $name = 'accordion_' . rand();
+    $field = (new field\Accordion($name,$this))
+      ->setLabel($label);
+    return $this->addField($field,$chain);
+  }
+
   function addField($field,$chain=false) {
     array_push($this->fields,$field);
     if ($chain) {return $field;}
     else {return $this;}
   }
 
+  // TODO: Check if is in field group
+  // Otherwise, need way to prefix 'button'
   function addButton($name='button',$chain=false) {
-    $field = (new Field\Group($name,$this))
-      ->addMessage('')
+    $field = (new Field\Group($name,$this));
+    $sub_fields = $field
       ->addText('label')
       ->addSelect('link_target')
         ->setChoices(array(
-          'external',
-          'internal',
+          'external' => 'External (Another Website)',
+          'internal' => 'Internal (Your Website)',
           'section'
         ))
         ->endSelect()
@@ -61,6 +71,21 @@ trait FieldBuilder {
     return $this->addField($field,$chain);
   }
 
+  function addEmail($name,$chain=false) {
+    $field = (new field\Email($name,$this));
+    return $this->addField($field,$chain);
+  }
+
+//   function addGoogleMap($name,$chain=false) {
+//   $field = (new field\GoogleMap($name,$this));
+//   return $this->addField($field,$chain);
+// }
+
+  function addGroup($name) {
+    $field = new Field\Group($name,$this);
+    return $this->addField($field,true);
+  }
+
   function addHeadline($name='headline',$chain=false) {
     $field = (new Field\Text($name,$this))
       ->setMaxLength(60);
@@ -69,11 +94,6 @@ trait FieldBuilder {
       $this->currentField = $field;
       return $field;
     } else {return $this;}
-  }
-
-  function addGroup($name) {
-    $field = new Field\Group($name,$this);
-    return $this->addField($field,true);
   }
 
   function addImage($name,$chain=false) {
@@ -115,13 +135,19 @@ trait FieldBuilder {
     $preset = new $class();
   }
 
+  function addTab($name,$chain=false) {
+    $field = (new Field\Tab($name,$this));
+    return $this->addField($field,$chain);
+  }
+
+  function addTaxonomy($name,$chain=false) {
+    $field = (new field\Taxonomy($name,$this));
+    return $this->addField($field,$chain);
+  }
+
   function addText($name,$chain=false) {
     $field = (new Field\Text($name,$this));
-    array_push($this->fields,$field);
-    if ($chain) {
-      $this->currentField = $field;
-      return $field;
-    } else {return $this;}
+    return $this->addField($field,$chain);
   }
 
   function addTextArea($name,$chain=false) {
@@ -143,32 +169,9 @@ trait FieldBuilder {
     return $this->addField($field,$chain);
   }
 
-  function addVideo($name,$chain=false) {
-    $field = $this->addGroup($name);
-    $field
-      ->addMessage('')
-      ->addSelect('source')
-        ->setChoices(array(
-          'youtube' => 'YouTube',
-          'vimeo'
-        ))
-        ->endSelect()
-      ->addText('youtube_id',true)
-        ->setLabel('Video ID')
-        ->setLogic('source','youtube')
-        ->setPrepend('youtube.com/watch?v=')
-        ->setPlaceholder('AxG14lbL2Iw')
-        ->endText()
-      ->addText('vimeo_id',true)
-        ->setLabel('Video ID')
-        ->setPrepend('vimeo.com/')
-        ->setPlaceholder('237748768')
-        ->setLogic('source','vimeo')
-        ->endText()
-      ->addImage('thumbnail',true)
-        ->setRequired(0)
-        ->setInstructions('Optional');
-    return $this;
+  function addVideo($name='video',$chain=false) {
+    $field = $this->addClone('video','field_video',$chain);
+    return $field;
   }
 
   function addWysiwyg($name,$chain=false) {

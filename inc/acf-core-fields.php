@@ -2,9 +2,23 @@
 
 namespace Blueprint\Acf;
 
+$date_elements = (new Group('date_elements'))
+  ->addSelect('dotw')
+    ->setLabel('Day of the Week')
+    ->setChoices(array(
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ))
+    ->end();
+
 $featured_media = (new Group('featured_media'))
   ->setPosition('high')
-  ->setLabelPlacement('top')
+  ->setLabelPlacement('left')
   // Featured Media Group
   ->addGroup('featured_media')
     ->setLayout('row')
@@ -16,16 +30,17 @@ $featured_media = (new Group('featured_media'))
       ->end()
     ->addClone('video','field_video',true)
       ->setDisplay('group')
-      ->setLogic('format','video')
+      ->setLogic('featured_media_format','video')
       ->end()
     ->endGroup()
+    //->dumpFields()
   ->setLocation(apply_filters('bp_featured_media_location',array('post')));
 
 // Video
 
 $video = (new Group('video'))
   ->addGroup('video')
-    ->addSelect('source')
+    ->addSelect('host')
       ->setChoices(array('youtube'=>'YouTube','vimeo'))
       ->setDefaultValue('youtube')
       ->endSelect()
@@ -35,7 +50,7 @@ $video = (new Group('video'))
       ->setPrepend('youtube.com/watch?v=')
       ->setPlaceholder('T-YqcuatM6I')
       ->setLogic()
-        ->addCondition('source','youtube')
+        ->addCondition('host','youtube')
         ->endLogic()
       ->endText()
     // Video ID
@@ -44,40 +59,86 @@ $video = (new Group('video'))
       ->setPrepend('vimeo.com/')
       ->setPlaceholder('227138298')
       ->setLogic()
-        ->addCondition('source','vimeo')
+        ->addCondition('host','vimeo')
         ->endLogic()
       ->endText()
+    ->addImage('thumbnail',true)
+      ->setRequired(0)
+      ->setInstructions('Optional')
+      ->end()
     ->endGroup();
+
+    // ->addMessage('')
+    // ->addSelect('source')
+    //   ->setChoices(array(
+    //     'youtube' => 'YouTube',
+    //     'vimeo'
+    //   ))
+    //   ->endSelect()
+    // ->addText('youtube_id',true)
+    //   ->setLabel('Video ID')
+    //   ->setLogic('source','youtube')
+    //   ->setPrepend('youtube.com/watch?v=')
+    //   ->setPlaceholder('AxG14lbL2Iw')
+    //   ->endText()
+    // ->addText('vimeo_id',true)
+    //   ->setLabel('Video ID')
+    //   ->setPrepend('vimeo.com/')
+    //   ->setPlaceholder('237748768')
+    //   ->setLogic('source','vimeo')
+    //   ->endText()
+
+    // return $this;
 
 // Hero
 
 $hero = (new Group('hero'))
   ->setOrder('top')
-  ->addGroup('hero')
-    ->addSelect('content_type')
-      ->setChoices(array(
-        'default' => 'Default',
-        'manual'  => 'Manual (Headline & Button)',
-        'post_select' => 'Select a Post'
-      ))
-      ->endSelect()
-    // Headline
-    ->addText('headline',true)
-      ->setLogic()
-        ->addCondition('content_type','post_select')
-        ->endLogic()
-      ->end()
-    ->addPostObject('post_select',true)
-      ->setInstructions('S')
-      ->setLogic('content_type','post_select')
-      ->end()
-    ->addText('button_label',true)
-      ->setLabel('Button Label')
-      ->setPlaceholder('Defaults to "Learn More"')
-      ->setLogic('content_type','manual')
-      ->endText()
-  ->endGroup()
   ->setLocation('page');
+
+$hero_group = $hero->addGroup('hero')
+  ->setLayout('row');
+
+$hero_group
+  ->addSelect('content_type')
+    ->setChoices(array(
+      'default' => 'Default',
+      'manual'  => 'Manual (Headline & Button)',
+      'post_select' => 'Select a Post'
+    ));
+
+$hero_group
+  ->addText('headline',true)
+    ->setLogic()
+      ->addCondition('content_type','default','!=')
+      ->endLogic()
+    ->end();
+
+$hero_group
+  ->addPostObject('post_select',true)
+    ->setLogic('content_type','post_select')
+    ->end();
+
+$hero_group
+  ->addText('button_text',true)
+    ->setLabel('Button Text')
+    ->setPlaceholder('Defaults to "Learn More"')
+    ->setLogic()
+      ->addCondition('content_type','post_select')
+      ->endLogic()
+    ->end();
+
+$hero_group
+  ->addButton('button',true)
+    ->setLogic()
+      ->addCondition('content_type','manual')
+      ->endLogic()
+    ->end();
+
+$site_info = (new Group('site_info'))
+  ->setLocation('site_options','options_page')
+  ->addGroup('site')
+    ->addEmail('email');
 
 $main_social = (new Group('main_social'))
   ->setLocation('site_options','options_page')
@@ -87,8 +148,10 @@ $main_social = (new Group('main_social'))
     ->addSelect('platform')
       ->setChoices(array(
         'facebook',
-        'twitter',
-        'linkedin'
+        'instagram',
+        'linkedin' => 'LinkedIn',
+        'shopify',
+        'twitter'
       ))
       ->endSelect()
     ->addUrl('link')
@@ -99,7 +162,7 @@ $text_elements = (new Group('text_elements'))
   ->addText('headline')
   ->setLocation('post');
 
-$form_elements = (new Group('personal_info'))
+$personal_info_elements = (new Group('personal_info'))
   ->addText('first_name')
   ->addText('middle_name',true)
     ->setRequired(0)
@@ -107,20 +170,8 @@ $form_elements = (new Group('personal_info'))
   ->addText('last_name')
   ->addText('title')
   ->addText('company')
-  ->addTextArea('bio')
-  ->setLocation('blog');
-
-// Events
-// TODO: MTF Activate with events class, etc
-
-$event_info = (new Group('event_info'))
-  ->addDateTime('start_date',true)
-    ->setLabel('Starts')->end()
-  ->addDateTime('end_date',true)
-    ->setLabel('ends')->end()
-  ->setLocation('event')
-  ->setLayout('table')
-  ->setLabelPlacement('left');
+  ->addWysiwyg('bio')
+  ->setLocation('');
 
 $intro = (new Group('intro'))
   ->addGroup('intro')
@@ -130,4 +181,51 @@ $intro = (new Group('intro'))
   ->setLocation('page')
   ->setOrder('high');
 
+// Events
+// TODO: MTF Activate with events class, etc
+
+$event_info = (new Group('event_info'))
+  ->addGroup('event')
+    ->addAccordion('Time',true)
+      ->setOpen(false)->end()
+    ->addDateTime('start',true)
+      ->setLabel('Starts')->end()
+    ->addDateTime('end',true)
+      ->setLabel('ends')->end()
+    ->addAccordion('Location')
+    ->addGroup('address')
+      ->addText('street',true)
+        ->setPlaceholder('214 Example Road')->end()
+      ->addText('city',true)
+        ->setPlaceholder('Baltimore')->end()
+      ->addText('state',true)
+        ->setPlaceholder('Maryland')->end()
+      ->addText('zip',true)
+        ->setPlaceholder('12345')->end()
+      ->setLayout('table')
+      ->end()
+    ->end()
+  ->setLocation('event')
+  ->setLayout('table')
+  ->setLabelPlacement('left');
+
 do_action('bp/acf/after_core');
+
+$form_elements = (new Group('form_elements'))
+  ->addGroup('button')
+    ->addText('label')
+    ->addSelect('link_type')
+      ->setChoices(array(
+        'internal',
+        'external'
+      ))
+      ->end()
+    ->addUrl('external_link',true)
+      ->setLogic('button_link_type','external')
+      ->end()
+    ->addPostObject('internal_link',true)
+      ->setLogic('button_link_type','internal')
+      ->end();
+
+// $iframe_elements = (new Group('iframe_elements'))
+//   ->

@@ -1,6 +1,10 @@
 <?php
 
-$nav_script = new Blueprint\EnqueueScript('bp_nav_script','assets/js/nav.js',BP);
+use Blueprint as bp;
+use Blueprint\Enqueue as enqueue;
+
+$nav_script = (new enqueue\Script('bp_nav_script','nav.js',BP))
+  ->addLocalize('SITEURL',get_option('siteurl'));
 
 
 // Excerpt Word Count
@@ -65,10 +69,17 @@ function bp_acf_admin_style() {
         min-height: 0 !important;
       }
       .wp-media-buttons .insert-media {display:none;}
-      .-top-------- .nolabel > .acf-label, .hide {display:none;}
+      .-top > .nolabel > .acf-label {display:none;}
       #commentstatusdiv {display:none;}
 
       .acf-clone-fields {border:none !important; padding:none !important;}
+
+      .inside.acf-fields.-left > .acf-field-group::before {display:none !important;}
+      .inside.acf-fields.-left > .acf-field-group > .acf-label {display:none !important;}
+      .inside.acf-fields.-left > .acf-field-group > .acf-input {width:100% !important;}
+      .inside.acf-fields.-left > .acf-field-group {padding: 0 !important;}
+      .inside.acf-fields.-left > .acf-field-group > .acf-input {padding: 0 !important;}
+      .inside.acf-fields.-left > .acf-field-group > .acf-input > .acf-fields { border:none !important;}
     </style>
   ";
 } add_action('admin_head','bp_acf_admin_style');
@@ -113,8 +124,6 @@ function register_theme_menus() {
 
 add_action('init','register_theme_menus');
 
-new Blueprint\Script\GoogleFonts('https://fonts.googleapis.com/css?family=Playfair+Display:400,700,900');
-
 
 add_theme_support( 'post-thumbnails' );
 
@@ -123,6 +132,9 @@ function bp_head_scripts() {
   wp_enqueue_script('bp_mailer_script',BP_REL_PATH . '/assets/js/mailer.js');
   wp_enqueue_script('slider',BP_REL_PATH . '/assets/js/slider.js');
 } add_action('wp_enqueue_scripts','bp_head_scripts');
+
+$mailer_script = (new bp\Enqueue\Script('bp_mailer_script','mailer.js',BP))
+  ->addAjax();
 
 function rmpts() {
   remove_post_type_support('page','editor');
@@ -184,12 +196,12 @@ function custom_unregister_theme_post_types() {
 
 
 
-function admin_field_inspector() {
-  if (current_user_can('administrator')) {
-    $editor_script = (new Blueprint\EnqueueScript('bp_editor_shortcodes','assets/js/admin.js',BP))
-    ->addAction('admin_enqueue_scripts');
-  } else {wp_die();}
-} add_action('admin_head','admin_field_inspector');
+// function admin_field_inspector() {
+//   if (current_user_can('administrator')) {
+//     $editor_script = (new Blueprint\EnqueueScript('bp_editor_shortcodes','admin.js',BP))
+//     ->addAction('admin_enqueue_scripts');
+//   } else {wp_die();}
+// } add_action('admin_head','admin_field_inspector');
 
 
 add_action('acf/render_field',function($field) {
@@ -240,6 +252,118 @@ function bp_var($key,$fallback_value=null) {
     return $GLOBALS['wp_blueprint'][$key];
   } else {
     if ($fallback_value !== null) {return $fallback_value;}
-    else {return false;}
+    else {return null;}
   }
+}
+
+// ENVIRONMENTS
+
+function bp_is_local() {
+  $host = $_SERVER['HTTP_HOST'];
+  if ($host == 'localhost') {return true;}
+  else {return false;}
+}
+
+// Turn off required fields for local development
+
+if (bp_is_local()) {
+  add_action('acf/load_field',function($field) {
+    $field['required'] = false;
+    return $field;
+  });
+}
+
+// Lazy Loader Script
+
+$lazy_loader = (new Blueprint\Enqueue\Script('bp_lazy_loader_script','lazy-loader.js',BP));
+
+// Site Search Script
+
+$search_script = (new bp\Enqueue\Script('bp_script_search','search.js',BP))
+  ->addAjax();
+
+function bp_get_posts() {
+  $offset = $_POST['query']['offset'];
+  $cards = '';
+  $args = array(
+    's'         => $search,
+    'post_type' => bp_var('article_types'),
+    'offset'
+  );
+  $posts = get_posts($args); global $post;
+
+  foreach ($posts as $post) : setup_postdata($post);
+    $card = (new \Blueprint\Part\Card())->build();
+    $cards .= "
+      <div class='col-3'>
+        $card
+      </div>
+    ";
+  endforeach; wp_reset_postdata();
+  echo $cards;
+  wp_die();
+}
+
+function bp_get_part($base,$name=null) {
+  ob_start();
+  get_template_part('parts/' . $base,$name);
+  return ob_get_clean();
+}
+
+add_action( 'wp_ajax_bp_contact_form', 'bp_contact_form' );
+add_action( 'wp_ajax_nopriv_bp_contact_form', 'bp_contact_form');
+
+function bp_contact_form() {
+
+  $form    = '';
+  $site    = get_bloginfo('name');
+
+  parse_str($_POST['form'],$form);
+
+  // User Email
+  $subject = "$site (Submission Confirmation)";
+  $message = "Thanks for contacting $site. We'll be in touch soon!";
+  $user_email  = wp_mail('aofolts@gmail.com',$subject,$message);
+
+  // Admin Email
+
+  $headers = "MIME-Version: 1.0" . "\r\n";
+  $headers .= "Content-type:text/html;charset=UTF-8" . "\n";
+  $headers .= 'From: Great Dames <sender@example.com>' . "\n";
+
+  $email   = $form['email'];
+  $name    = $form['name'];
+  $subject = str_replace('_',' ',$form['subject']);
+  $subject = ucwords($subject);
+  $subject = "New $site Message ($subject)";
+  $message = $form['message'];
+  $message = "
+    <html>
+      <body>
+        <p><b>Email:</b> $email</p>
+        <p><b>Name:</b> $name</p>
+        <p><b>Message</b></p>
+        <p>$message</p>
+      </body>
+    </html>
+  ";
+  $admin_email = wp_mail('aofolts@gmail.com',$subject,$message,$headers);
+
+  if ($user_email && $admin_email) {echo 'Message sent!';}
+  else {echo 'There was a problem sending your message.';}
+
+  var_dump($form);
+
+  wp_die();
+
+}
+
+// Word Count
+
+function limit_words($text,$limit=200) {
+  $trunc = substr($text,0,200);
+  $trunc = explode(' ',$trunc);
+  array_pop($trunc);
+  $trunc = implode(' ',$trunc) . ' ...';
+  return $trunc;
 }

@@ -2,16 +2,16 @@
 
 namespace Blueprint\Part;
 
-class PostMeta {
+class PostMeta extends Part {
 
-  function build() {
+  function buildInit() {
 
     $author_id        = get_the_author_meta('ID');
     $user_id          = 'user_' . $author_id;
     $author_fname     = get_the_author_meta('first_name');
     $author_lname     = get_the_author_meta('last_name');
     $author_name      = $author_fname . ' ' . $author_lname;
-    $author_img       = ps_get_user_img($author_id,'icon-md avatar');
+    $author_img       = bp_get_avatar($author_id,'icon-md avatar');
     $author_company   = get_field('user_company',$user_id);
     $author_title     = get_field('user_title',$user_id);
 
@@ -28,7 +28,7 @@ class PostMeta {
       $author_website = '';
     }
 
-    return "
+    $this->part = "
       <div class='container-sm'>
         <div class='grid mbtb-center'>
           <div class='col-2'>
@@ -36,7 +36,7 @@ class PostMeta {
           </div>
           <div class='col-2'>
             <h4>$author_company</h4>
-            <h2>$author_name</h2>
+            <h5>$author_name</h5>
             <p class='p2 last'>
               $post_date<br />
               $author_website

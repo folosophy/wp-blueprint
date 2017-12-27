@@ -7,11 +7,11 @@ namespace Blueprint {
   bp_require('inc/action-editor-shortcodes',BP);
   bp_require('inc/action-editor-shortcodes-modal',BP);
 
-  $admin_style = (new EnqueueStyle('bp_admin_style','assets/css/admin.css',BP))
-    ->addAction('admin_enqueue_scripts');
-
-  $editor_script = (new EnqueueScript('bp_editor_shortcodes','assets/js/media-uploader.js',BP))
-    ->addAction('admin_enqueue_scripts');
+  // $admin_style = (new Enqueue\Style('bp_admin_style','assets/css/admin.css',BP))
+  //   ->setAction('admin_enqueue_scripts');
+  //
+  // $editor_script = (new Enqueue\Script('bp_editor_shortcodes','assets/js/media-uploader.js',BP))
+  //   ->addAction('admin_enqueue_scripts');
 
   //$localize_editor_script = (new LocalizeScript('bp_editor_shortcodes',BP));
 

@@ -1,19 +1,29 @@
 jQuery(document).ready(function($) {
 
-  function fyTempMailer() {
-    $('.form-contact').submit(function(e) {
+class ContactForm {
+
+  constructor() {
+    this.$form = $('.form-contact');
+    this.watchForms();
+  }
+
+  watchForms() {
+    this.$form.submit(function(e) {
       e.preventDefault();
       var $form = $(this),
-          email   = $form.find('input[name="Email"]').val(),
-          name    = $form.find('input[name="Name"]').val(),
-          body    = $form.find('textarea[name="Message"]').val(),
-          subject = 'Folosophy Website Message From ' + name,
-          to      = 'andrew@folosophy.com';
-      if ($form.attr('send-method') == 'manual') {
-        document.location = "mailto:"+to+"?subject="+subject+"&body="+body;
-      }
+          data  = {
+            'action': 'bp_contact_form',
+            'form'  : $form.serialize()
+          };
+      $.post(ajax.url,data,function(r) {
+        console.log(r);
+      });
     });
-  } fyTempMailer();
+  }
+
+}
+
+var contact = new ContactForm();
 
   // TODO: MTF, finish preloader
   setTimeout(function() {

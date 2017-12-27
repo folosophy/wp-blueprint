@@ -1,7 +1,8 @@
 <?php
 
+// Deprecated
 // Used In: part, template
-
+/*
 namespace Blueprint\Part;
 use \Blueprint as bp;
 
@@ -9,6 +10,7 @@ trait Builder {
 
   use bp\Chain;
 
+  protected $atts;
   protected $build;
   protected $field;
   protected $id;
@@ -18,6 +20,11 @@ trait Builder {
   protected $name;
   protected $class='';
   protected $tag;
+
+  function addImage($name='',$chain=false) {
+    $part = (new Image());
+    return $this->addPart($part,$chain);
+  }
 
   function addVideo($name='',$chain=false) {
     $field = $this->field['video'];
@@ -85,9 +92,14 @@ trait Builder {
     return $this;
   }
 
-  // $part: Accepts part name or part object
-
   function addPart($part=null,$chain=false) {
+    $part = $this->preparePart($part);
+    array_push($this->parts,$part);
+    if ($chain) {return $part;}
+    else {return $this;}
+  }
+
+  function preparePart($part) {
     if (!$part) {
       $part = (new Part(null,$this));
       $chain = true;
@@ -98,8 +110,12 @@ trait Builder {
     $part
       ->setParent($this)
       ->setField($this->getField());
-    array_push($this->parts,$part);
+    return $part;
+  }
 
+  function prependPart($part=null,$chain=false) {
+    $part = $this->preparePart($part);
+    array_push($this->parts,$part);
     if ($chain) {return $part;}
     else {return $this;}
   }
@@ -157,7 +173,7 @@ trait Builder {
     else {$id = null;}
     // Build
     return "
-      <$tag $id class='$this->class'>
+      <$tag $id class='$this->class' $this->atts>
         $body
       </$tag>
     ";

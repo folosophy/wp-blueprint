@@ -28,8 +28,8 @@ class Theme {
   }
 
   protected function enqueueStyle() {
-    $style = (new EnqueueStyle('theme_style','style.css'))
-      ->addAction();
+    $style = (new Enqueue\Style('theme_style','style.css'))
+      ->setSubDir(false);
   }
 
   use Theme\Settings;

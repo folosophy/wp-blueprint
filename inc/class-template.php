@@ -1,51 +1,135 @@
 <?php
 
-namespace Blueprint\Template;
+namespace Blueprint;
 use \Blueprint\Part as part;
 
-class Template {
-
-  use part\Builder;
+class Template extends part\Part {
 
   protected $head;
+  protected $header;
   protected $body;
   protected $hero;
   protected $intro;
   protected $postType;
 
-  function __construct() {
-    $this->head = new part\Head();
-    $this->postType = get_post_type();
-    if (method_exists($this,'init')) {$this->init();}
-  }
-
-  function render() {
-    $this->head->render();
-    get_header();
-    $this->renderBody();
-    get_footer();
-  }
-
-  protected function renderBody() {
+  protected function init() {
     wp_reset_query();
-    if ($this->hero)  {$this->hero->render();}
-    if ($this->intro) {$this->intro->render();}
-    echo $this->body;
-    echo $this->buildParts();
+    $this->postType = get_post_type();
+    $this->setTag('html');
+  }
+
+  function getBody() {
+    if (!isset($this->body)) {
+      $this->setBody();
+    }
+    return $this->body;
+  }
+
+  function getHeader() {
+    if (!isset($this->header)) {
+      $this->header = bp_get_part('header');
+    }
+    return $this->header;
+  }
+
+  function getHero() {
+    if (!isset($this->hero)) {$this->setHero();}
+    return $this->hero;
+  }
+
+  function setBody() {
+    $this->body = (new part\Part())
+      ->setTag('body');
+    return $this->body;
+  }
+
+  protected function setHead() {
+    $this->head = new part\Head();
+  }
+
+  function setHero($part=null,$chain=false) {
+    $this->hero = (new part\Hero());
+    return $this;
+  }
+
+  protected function setPropPart($prop='parts') {
+    $this->propPart = $prop;
+    return $this;
   }
 
   protected function getFooter() {
-    $footer = get_template_part('parts/footer');
-    echo "
+    ob_start();
+    get_template_part('parts/footer');
+    $footer = ob_get_clean();
+    $footer .= "
       </body>
       </html>
     ";
+    return $footer;
   }
 
+  protected function getPart($base,$part) {
+    ob_start();
+    get_template_part("parts/$base",$part);
+    return ob_get_clean();
+  }
+
+  // Deprecated
   protected function getTemplate($base,$part) {
     ob_start();
     get_template_part("parts/$base",$part);
     return ob_get_clean();
   }
+
+  function setBodyType() {
+    if (is_single()) {
+      $this->addClass();
+    }
+    elseif (is_page()) {
+      $this->bodyClass .= 'page-' . $this->post->post_name;
+      $type = 'page';
+    }
+    else {$type = 'index';}
+    $this->bodyClass .= ' body-' . $type;
+    return $this;
+  }
+
+  function buildBody() {
+    if (!isset($this->body)) {$this->setBody();}
+    if (!$this->head) {$this->setHead();}
+    $this->addPart($this->head);
+    $this->addPart($this->body);
+    // Nav
+    $nav = (new part\Part())
+      ->setTag(false)
+      ->setName('nav')
+      ->addHtml($this->getHeader());
+    $this->body->insertPartBefore($nav);
+  }
+
+  function buildFooter() {
+    $this->getBody()->addHtml($this->getFooter());
+  }
+
+  protected function buildHero() {
+    if (isset($this->hero)) {
+      $this->getBody()->insertPartBefore($this->getHero());
+    }
+  }
+
+  function build() {
+    //$this->buildHeader();
+    $this->buildHero();
+    $this->buildBody();
+    $this->buildFooter();
+    return parent::build();
+  }
+
+  //
+  // // TODO: build zones... children
+  // function render() {
+  //   parent::render();
+  //   get_template_part('parts/footer');
+  // }
 
 }
