@@ -10,6 +10,11 @@ class Archive extends Page {
   protected $grid;
   protected $cols;
 
+  function init() {
+    parent::init();
+    add_action('wp_enqueue_scripts',array($this,'localizeLoadMore'));
+  }
+
   function getGrid() {
     if (!isset($this->grid)) {$this->setGrid();}
     return $this->grid;
@@ -20,6 +25,11 @@ class Archive extends Page {
     $this->grid = (new part\PostGrid())
       ->setArg('post_type',$post->post_name)
       ->setArg('numberposts',9);
+  }
+
+  function localizeLoadMore() {
+    $query = $this->getGrid()->getQuery();
+    wp_localize_script('bp_lazy_loader_script','archive',array('query_vars'=>$query->query_vars));
   }
 
   function buildArchive() {

@@ -8,15 +8,22 @@ class PostGrid extends Grid {
   protected $args;
   protected $numPosts;
   protected $postType = 'post';
+  protected $query;
   protected $itemBuilder;
 
   protected function init() {
+    parent::init();
     $this->setCols(bp_var('post_grid_columns',3));
     $this->setArgs();
   }
 
   function getArgs() {
     return $this->args;
+  }
+
+  function getQuery() {
+    if (!$this->query) {$this->query = (new \WP_Query($this->args));}
+    return $this->query;
   }
 
   function setArg($key,$val) {
@@ -26,10 +33,9 @@ class PostGrid extends Grid {
 
   function setArgs($args=null) {
     if (!$args) {
-      if (!$this->numPosts) {$this->numPosts = $this->cols;}
       $args  = array(
-        'post_type'   => $this->postType,
-        'numberposts' => $this->numPosts
+        'post_type'      => $this->postType,
+        'posts_per_page' => 9
       );
     }
     $this->args= $args;
@@ -54,7 +60,9 @@ class PostGrid extends Grid {
       $this->setItemBuilder();
     }
 
-    $posts = get_posts($this->args); global $post;
+    $query = new \WP_Query($this->args);
+    $this->query = $query;
+    $posts = $query->posts; global $post;
 
     foreach ($posts as $post) : setup_postdata($post);
       // TODO: Include post object in any files that need it?
@@ -96,10 +104,25 @@ class PostGrid extends Grid {
     return $this;
   }
 
-  function build() {
+  function prepareLoadMore() {
+    if ($this->query->max_num_pages > 1) {
+      $this->addPart()
+        ->setClass('center')
+        ->addPart()
+          ->addHtml('Load More')
+          ->setClass('load-more-posts');
+    }
+  }
+
+  protected function prepareItems() {
+    if (empty($this->items)) {$this->setItems();}
+    $this->getGrid()->addHtml($this->items);
+  }
+
+  function buildInit() {
     if (!isset($this->args['post__not_in'])) {$this->setNotIn();}
-    $this->setItems();
-    return parent::build();
+    $this->prepareItems();
+    $this->prepareLoadMore();
   }
 
 }

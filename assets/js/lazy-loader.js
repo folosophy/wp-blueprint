@@ -7,12 +7,16 @@ function psInit() {
  psLoadImages();
 }
 
+console.log(archive.query_vars);
+
 // Main Class
 class Presto {
 
   constructor() {
     this.isLoading = false;
+    $('p:not(.lazy-loaded)').addClass('lazy-unloaded');
     this.checkImages();
+    this.checkSections();
   }
 
   checkImages() {
@@ -20,6 +24,7 @@ class Presto {
     this.loadImages();
     $(window).on('scroll',function() {
       that.loadImages();
+      that.checkSections();
     });
   }
 
@@ -44,6 +49,7 @@ class Presto {
         var src = $that.attr('src-full');
         if (src) {
           $that.removeClass('ps-unloaded').attr('src',src);
+          $that.addClass('ps-loaded');
           $that.attr('src',$that.attr('src-full'));
         }
       }
@@ -56,9 +62,38 @@ class Presto {
     });
   }
 
+  checkSections() {
+    var self = this,
+        $items = $('.lazy-unloaded,p:not(.lazy-loaded)'),
+        delay = 0;
+    $items.each(function() {
+      var $item  = $(this),
+          inView = self.inViewport($item);
+      if (inView) {
+        setTimeout(function() {
+          $item.removeClass('lazy-unloaded');
+          $item.addClass('lazy-loaded');
+        },delay);
+        delay += 150;
+      }
+    });
+  }
+
+  inViewport($el,range=0) {
+    var sT    = $(window).scrollTop() - range,
+        sB    = $(window).scrollTop() + $(window).height() + range,
+        elH   = $el.height(),
+        elT   = $el.offset().top,
+        elB   = $el.offset().top + elH;
+    if ((elT >= sT && elT <= sB) || (elB >= sT && elB <= sB)) {
+      return true
+    } else {
+      return false;
+    }
+  }
+
 }
 
 var presto = new Presto();
-
 
 }); // End jQuery

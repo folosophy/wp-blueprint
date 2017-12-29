@@ -36,7 +36,7 @@ class Video extends Part {
 
   // TODO: #toaddpart
   function setThumbnail() {
-    if ($this->field && isset($this->field['thumbnail'])) {
+    if ($this->field && $this->field['thumbnail']) {
       $imgId = $this->field['thumbnail'];
       $this->thumbnail = (new Image())
         ->setSrc($imgId)
@@ -91,7 +91,7 @@ class Video extends Part {
       $this->playButton
       $this->thumbnail
       ";
-      
+
   }
 
 }

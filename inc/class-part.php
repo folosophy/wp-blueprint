@@ -94,6 +94,14 @@ class Part {
     return $this->name;
   }
 
+  protected function initPart($part) {
+    if (!isset($this->$part)) {
+      $method = 'set' . ucwords($part);
+      $this->$method();
+    }
+    return $this->$part;
+  }
+
   // protected function initPart($name) {
   //   // Checks to see if part is set
   //   if (isset($this->))
@@ -122,16 +130,19 @@ class Part {
     return $this;
   }
 
+  function addAttr($attr,$val) {
+    if (!empty($this->atts[$attr])) {$this->atts[$attr] .= ' ' . $val;}
+    else {$this->atts[$attr] = $val;}
+  }
+
   function addButton($name=null,$chain=true) {
     $part = (new Button($name));
     return $this->addPart($part,$chain);
   }
 
   function addClass($class) {
-    if (is_string($this->atts)) {diedump($this->atts);}
-    if (!isset($this->atts['class'])) {$this->atts['class'] = '';}
-    $this->class .= ' ' . $class;
-    $this->atts['class'] .= ' ' . $class;
+    $this->addAttr('class',$class);
+    if (isset($this->class)) {$this->class = $this->atts['class'];}
     return $this;
   }
 
@@ -206,6 +217,11 @@ class Part {
         }
       }
     }
+  }
+
+  function setLazy() {
+    $this->addClass('lazy-item lazy-unloaded');
+    return $this;
   }
 
   function preparePart($part) {

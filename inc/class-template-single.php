@@ -44,6 +44,7 @@ class Single extends \Blueprint\Template {
       default    :
         $part = (new part\Part())
           ->setTag('h4')
+          ->setClass('post-header__category')
           ->addPart()
             ->setTag('a')
             ->addHtml($this->category)
@@ -62,16 +63,21 @@ class Single extends \Blueprint\Template {
     return $this->postBody;
   }
 
-  function setCategory() {
-    $terms = get_the_terms(get_the_ID(),'event_category');
-    $cat = '';
-    if (!$terms) {$this->category = get_post_type();}
-    else {
-      foreach ($terms as $i => $term) {
-        if ($i < count($terms) - 1) {$this->category .= ' / ';}
-        $this->category .= $term->name;
+  function setCategory($category=null) {
+    if (!$category) {
+      $terms = get_the_terms(get_the_ID(),'event_category');
+      $cat = '';
+      if (!$terms) {$this->category = get_post_type();}
+      else {
+        foreach ($terms as $i => $term) {
+          if ($i < count($terms) - 1) {$this->category .= ' / ';}
+          $this->category .= $term->name;
+        }
       }
+    } else {
+      $this->category = $category;
     }
+    $this->category = ucwords(str_replace('_',' ',$this->category));
   }
 
   function setFeaturedMedia() {
@@ -147,13 +153,17 @@ class Single extends \Blueprint\Template {
       ->addPart()
         ->setClass('post__recent-posts');
 
+    $recent_posts_label =
+      $this->postTypeObject->labels->recent_posts ??
+      $this->postTypeObject->labels->name;
+
     $posts->addPart()
       ->setClass('headline-primary')
       ->setTag('h2')
       ->addPart()
         ->setTag('span')
         ->setClass('headline-primary__inner')
-        ->addHtml('Recent ' . $this->postTypeObject->labels->name);
+        ->addHtml($recent_posts_label);
 
     $post_grid = (new part\PostGrid())
       ->setPostType()
@@ -174,6 +184,7 @@ function setPostSidebar() {
   function setTitle() {
     $this->title = (new part\Part())
       ->setTag('h2')
+      ->setClass('post-title post-header__title')
       ->addPart()
         ->setTag('span')
         ->addHtml(get_the_title())
@@ -193,6 +204,9 @@ function setPostSidebar() {
     if (get_the_content()) {
       $content = apply_filters('the_content',get_the_content());
       $this->getPostContent()->addHtml($content);
+    } else {
+      $no_content = $this->postTypeObject->labels->no_content ?? 'More info coming soon!';
+      $this->getPostContent()->addHtml("<p class='center'>$no_content</p>");
     }
   }
 

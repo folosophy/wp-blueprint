@@ -16,6 +16,7 @@ class Headline extends Part {
 
   function init() {
     $this->setTag('h2');
+    $this->setLazy();
   }
 
   function getInner() {

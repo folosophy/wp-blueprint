@@ -74,12 +74,13 @@ function bp_acf_admin_style() {
 
       .acf-clone-fields {border:none !important; padding:none !important;}
 
-      .inside.acf-fields.-left > .acf-field-group::before {display:none !important;}
-      .inside.acf-fields.-left > .acf-field-group > .acf-label {display:none !important;}
-      .inside.acf-fields.-left > .acf-field-group > .acf-input {width:100% !important;}
-      .inside.acf-fields.-left > .acf-field-group {padding: 0 !important;}
-      .inside.acf-fields.-left > .acf-field-group > .acf-input {padding: 0 !important;}
-      .inside.acf-fields.-left > .acf-field-group > .acf-input > .acf-fields { border:none !important;}
+      .acf-field-group.nolabel::before {display:none !important;}
+      .acf-field-group.nolabel > .acf-label {display:none !important;}
+      .acf-field-group.nolabel > .acf-input {width:100% !important;}
+      .acf-field-group.nolabel {padding: 0 !important;}
+      .acf-field-group.nolabel > .acf-input {padding: 0 !important;}
+      .acf-field-group.nolabel > .acf-input > .acf-fields { border:none !important;}
+
     </style>
   ";
 } add_action('admin_head','bp_acf_admin_style');

@@ -20,7 +20,8 @@ class Card extends Part {
   protected function init() {
     \bp_log_post();
     $this->setType();
-    $this->link = get_the_permalink();
+    $this->setAttr('href',get_the_permalink());
+    $this->setLazy();
   }
 
   protected function setBody() {
@@ -69,7 +70,7 @@ class Card extends Part {
   protected function setType($type = null) {
     if (!$type) {$type = 'article';}
     $this->$type = $type;
-    $this->class = 'card-' . $type;
+    $this->addClass('card-' . $type . ' card-' . get_post_type());
   }
 
   function getImg($img = null) {
@@ -108,14 +109,8 @@ class Card extends Part {
 
   function buildInit() {
     $this->setBody();
-    $this->setTag(false);
-    $this->addHtml(
-      "
-        <a class='$this->class' href='$this->link'>
-          $this->body
-        </a>
-      "
-    );
+    $this->setTag('a');
+    $this->addHtml($this->body);
   }
 
 }

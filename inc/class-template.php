@@ -15,7 +15,15 @@ class Template extends part\Part {
   protected function init() {
     wp_reset_query();
     $this->postType = get_post_type();
-    $this->setTag('html');
+    $this->setTag('body');
+    $this->setTemplateType();
+  }
+
+  function setTemplateType() {
+    global $post;
+    if (is_single())   {$class = 'single_' . get_post_type();}
+    elseif (is_page()) {$class = 'page-' . $post->post_name;}
+    $this->addClass($class);
   }
 
   function getBody() {
@@ -47,7 +55,7 @@ class Template extends part\Part {
     $this->head = new part\Head();
   }
 
-  function setHero($part=null,$chain=false) {
+  function setHero() {
     $this->hero = (new part\Hero());
     return $this;
   }

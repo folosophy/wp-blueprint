@@ -10,10 +10,13 @@ class Grid extends Part {
   protected $numItems = 3;
   protected $type;
   protected $grid;
-  public $parentChain;
 
-  function endChain() {
-    return $this->parentChain;
+  protected function init() {
+    $this->setClass('grid-container');
+  }
+
+  function getGrid() {
+    return $this->initPart('grid');
   }
 
   function addItem($item=null) {
@@ -32,12 +35,19 @@ class Grid extends Part {
     return $this;
   }
 
+  function setGrid() {
+    $this->grid = (new Part())
+      ->setClass('grid');
+  }
+
+  function prepareGrid() {
+    $this->getGrid()->insertPart($this->items);
+    $this->insertPart($this->getGrid());
+  }
+
   function build() {
-    return "
-      <div class='grid'>
-        $this->items
-      </div>
-    ";
+    $this->prepareGrid();
+    return parent::build();
   }
 
 }

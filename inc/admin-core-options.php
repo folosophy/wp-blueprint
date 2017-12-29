@@ -4,4 +4,6 @@ namespace Blueprint;
 
 $blueprint = (new OptionsPage('site_options'))
   ->setCapability('edit_posts')
-  ->setIcon('schedule');
+  ->setRedirect(false)
+  ->setIcon('schedule')
+  ->addSubPage('footer');

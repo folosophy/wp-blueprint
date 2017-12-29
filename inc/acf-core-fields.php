@@ -136,12 +136,12 @@ $hero_group
     ->end();
 
 $site_info = (new Group('site_info'))
-  ->setLocation('site_options','options_page')
+  ->setLocation('site-options','options_page')
   ->addGroup('site')
     ->addEmail('email');
 
 $main_social = (new Group('main_social'))
-  ->setLocation('site_options','options_page')
+  ->setLocation('site-options','options_page')
   ->addRepeater('main_social')
     ->setButtonLabel('Add an account')
     ->setLabel('Accounts')

@@ -8,28 +8,25 @@ use \Blueprint\Template as template;
 
 class Team extends template\Single {
 
-function setPostHeader() {
-  $header = parent::setPostHeader();
+function buildPostHeader() {
+  parent::buildPostHeader();
   $img = (new part\Image())
-    ->addClass('avatar-small');
-  $header->prependPart($img);
+    ->addClass('avatar-small post-header__avatar');
+  $header = $this->getPostHeader();
+  $header->insertPartBefore($img);
 
   $title = get_field('title');
   $company = get_field('company');
-  if ($company) {$meta = "<b>$title</b><br />$company";}
-  else {$meta = "<b>$title</b>";}
+  if ($company) {$meta = "$title<br />$company";}
+  else {$meta = "$title";}
 
-  $header->addHtml("<p>$meta</p>");
-  $header->addVideo('video',true);
+  $header->addHtml("<p class='post-header__meta'>$meta</p>");
   $header->addSpacer();
   return $header;
 }
 
-function setCategory() {
-  $this->category = (new part\Part())
-    ->setTag('h4')
-    ->addHtml(get_field('company'));
-  return $this->category;
+function build() {
+  return parent::build();
 }
 
 }

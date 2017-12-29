@@ -112,13 +112,17 @@ class PostType {
     return $this;
   }
 
-  function setLabel($label=null) {
-    if (!$label) {
-      $label = $this->pluralName;
-      $label = str_replace('_',' ',$label);
+  function setLabel($label=null,$value=null) {
+    if ($value) {
+      $this->labels[$label] = $value;
+    } else {
+      if (!$label) {
+        $label = $this->pluralName;
+        $label = str_replace('_',' ',$label);
+      }
+      $label = ucwords($label);
+      $this->label = $label;
     }
-    $label = ucwords($label);
-    $this->label = $label;
     return $this;
   }
 

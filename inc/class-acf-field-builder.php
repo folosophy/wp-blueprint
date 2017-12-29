@@ -125,6 +125,11 @@ trait FieldBuilder {
     return $this->addField($field,$chain);
   }
 
+  function addNumber($name,$chain=false) {
+    $field = (new Field\Number($name,$this));
+    return $this->addField($field,$chain);
+  }
+
   function addPostObject($name,$chain=false) {
     $field = (new Field\PostObject($name,$this));
     return $this->addField($field,$chain);
@@ -133,6 +138,12 @@ trait FieldBuilder {
   function addPreset($preset) {
     $class = 'Blueprint\\Preset\\' . ucwords($preset);
     $preset = new $class();
+  }
+
+  function addRange($name,$chain=false) {
+    $field = (new Field\Number($name,$this))
+      ->setType('range');
+    return $this->addField($field,$chain);
   }
 
   function addTab($name,$chain=false) {

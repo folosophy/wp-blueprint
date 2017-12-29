@@ -11,12 +11,15 @@ class Head extends Part  {
 
   function init() {
     wp_reset_query();
-    // global $post;
-    // $this->post = $post;
     $this->setTag('head');
-    // $this->setInfo();
-    // $this->setWpHead();
-    // $this->setHead();
+    $this->setTemplateType();
+  }
+
+  function setTemplateType() {
+    global $post;
+    if (is_single())   {$class = 'single_' . get_post_type();}
+    elseif (is_page()) {$class = 'page-' . $post->post_name;}
+    $this->addClass($class);
   }
 
   // function setBodyType() {
@@ -58,6 +61,11 @@ class Head extends Part  {
   function buildInit() {
     $this->addHtml($this->getWpHead());
     $this->addHtml($this->getMeta());
+  }
+
+  function build() {
+    echo "<!DOCTYPE html>";
+    return parent::build();
   }
 
 }

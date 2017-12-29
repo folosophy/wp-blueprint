@@ -12,6 +12,11 @@ class Choice extends acf\Field {
     wp_die($this->field);
   }
 
+  function allowNull($bool=true) {
+    $this->field['allow_null'] = $bool;
+    return $this;
+  }
+
   function setChoices($choices) {
     if (!$choices) {wp_die('Needs choices.');}
     if (is_string($choices)) {

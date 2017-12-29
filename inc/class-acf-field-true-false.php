@@ -8,7 +8,7 @@ class TrueFalse extends acf\Field {
   function init() {
     $this->setType('true_false');
     $this->setUI();
-    $this->setDefaultValue(1);
+    $this->setDefaultValue(0);
   }
 
   function endTrueFalse() {

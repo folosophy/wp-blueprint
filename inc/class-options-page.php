@@ -4,17 +4,24 @@ namespace Blueprint;
 
 class OptionsPage {
 
+  protected $name;
   protected $options = array();
   protected $parent;
   protected $title;
 
   function __construct($slug) {
-    $this->options['menu_slug'] = $slug;
+    $this->options['menu_slug'] = str_replace('_','-',$slug);
     $this->setTitle($slug);
     $this->setPageTitle();
     $this->setMenuTitle();
     $this->setCapability();
     add_action('init',array($this,'add'));
+  }
+
+  function addSubPage($name,$chain=false) {
+    $page = (new OptionsPage('footer'))
+      ->setParent($this->options['menu_slug']);
+    return $this;
   }
 
   function setTitle($title=null) {
@@ -54,13 +61,20 @@ class OptionsPage {
     return $this;
   }
 
+  function setRedirect($redirect) {
+    if (is_bool($redirect)) {$this->options['redirect'] = $redirect;}
+    return $this;
+  }
+
   protected function getOptions() {
     return $this->options;
   }
 
   function add() {
     $parent = $this->parent;
-    if ($parent) {\acf_add_options_sub_page($this->getOptions());}
+    if ($parent) {
+      \acf_add_options_sub_page($this->getOptions());
+    }
     else {\acf_add_options_page($this->getOptions());}
   }
 
