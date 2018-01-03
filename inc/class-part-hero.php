@@ -49,7 +49,7 @@ class Hero extends Part {
       ->setClass('hero__bg');
     if ($field && $field['content_type'] == 'post_select') {
       $img_id = (int) get_post_thumbnail_id($field['post_select']);
-      $this->bg->setSrc($img_id);
+      if ($img_id) {$this->bg->setSrc($img_id);}
     }
   }
 
@@ -229,8 +229,8 @@ class HeroContent extends Part {
     $this->field = get_field('hero');
     if ($this->field) {
       switch ($this->field['content_type']) {
-        case 'manual' : $this->setManualContent();
-        case 'post_select' : $this->setPostSelectContent();
+        case 'manual' : $this->setManualContent(); break;
+        case 'post_select' : $this->setPostSelectContent(); break;
       }
     }
   }
@@ -258,58 +258,49 @@ class HeroContent extends Part {
   }
 
   function setDefaultButton($name=null,$chain=false) {
-    $button = $this->makeButton();
+    $button = $this->makeButton()
+      ->setLabel('Learn More');
     return $this->setPart($button,$chain,'defaultButton');
   }
 
   function setHeadline($headline=null) {
-    if (!$headline == false) {
+    if ($headline === false) {
+      $this->headline = false;
+    } else {
       if ($this->field['headline']) {
         $this->headline = $this->field['headline'];
       }
-    } else {
-      $this->headline = false;
     }
     return $this;
   }
 
   function setManualContent() {
     // TODO: create static function for retreiving button stuff
-    if ($this->field['headline']) {
-      $this->headline = $this->field['headline'];
-    }
+    $this->setHeadline();
     $field = $this->field['button'];
-    $target = $field['link_target'];
-    switch ($target) {
-      case 'internal': $link = get_permalink($field['internal_link']); break;
-      case 'external': $link = $field['external_link']; break;
-      case 'section':  $link = $field['section_link']; break;
-    }
-    $button = $this->setButton(null,true)
-      ->setLabel($field['label'])
-      ->setLink($link);
-    if ($target == 'external') {$button->setTarget();}
+    $button = $this->setButton(null,true);
     return $this;
   }
 
   function setPostSelectContent() {
     $this->setHeadline();
-    $button_field = $this->field['button'];
-    $link = get_permalink($this->field['post_select']);
     $button = $this->setButton(null,true)
-      ->setLabel($button_field['label'])
-      ->setLink($link);
+      ->setLink($this->field['post_select'],'internal')
+      ->setLabel($this->field['button_text']);
     return $this;
   }
 
   function setSecondaryButton($name=null,$chain=true) {
-    $button = $this->makeButton()
-      ->addClass('hero__button-secondary');
-    return $this->setPart($button,$chain,'secondaryButton');
+    $this->secondaryButton = (new Button())
+      ->addClass('hero__button hero__button-secondary');
+    if ($chain) {return $this->secondaryButton;}
+    else {return $this;}
   }
 
   function setButton($name=null,$chain=false) {
-    $button = $this->makeButton();
+    $button = $this->makeButton()
+      ->setDebugId('df')
+      ->setField(get_field('hero_button'));
     return $this->setPart($button,$chain,'button');
   }
 
@@ -319,25 +310,22 @@ class HeroContent extends Part {
   }
 
   function makeButton() {
-    if (!isset($this->buttons)) {$this->setButtons();}
     return (new Button())
       ->setType('hero')
-      ->addClass('hero__button')
-      ->setLabel('Learn More')
-      ->setLink('#section-next');
+      ->addClass('hero__button');
   }
 
   function prepareButtons() {
     if (isset($this->button)) {
       $this->getButtons()
-        ->addPart($this->button);
+        ->insertPart($this->button);
     } elseif (isset($this->defaultButton)) {
       $this->getButtons()
-        ->addPart($this->defaultButton);
+        ->insertPart($this->defaultButton);
     }
     if (isset($this->secondaryButton)) {
       $this->getButtons()
-        ->addPart($this->secondaryButton);
+        ->insertPart($this->secondaryButton);
     }
     return $this->buttons;
   }
@@ -349,6 +337,15 @@ class HeroContent extends Part {
         ->addClass('hero__headline');
     }
     $this->addPart($this->prepareButtons());
+  }
+
+}
+
+class Fuck extends Button {
+
+  function __construct($name='',$parent=null) {
+    $this->setDebugId('hsb');
+    parent::__construct();
   }
 
 }

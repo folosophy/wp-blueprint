@@ -13,7 +13,7 @@ class ButtonConditional extends Part {
   }
 
   protected function setButton() {
-    $target  = $this->getGroupField('button_link_target');
+    $target  = $this->getGroupField('button_link_type');
     $label   = $this->getGroupField('button_label');
     $newTab  = null;
     $options = $this->getGroupField('options');

@@ -2,6 +2,7 @@
 
 use Blueprint as bp;
 use Blueprint\Enqueue as enqueue;
+use \Blueprint\Part as part;
 
 $nav_script = (new enqueue\Script('bp_nav_script','nav.js',BP))
   ->addLocalize('SITEURL',get_option('siteurl'));
@@ -64,11 +65,22 @@ function add_cta_menu_cta_button($items,$args) {
 function bp_acf_admin_style() {
   echo "
     <style>
+
+      #acf-group_post_content {
+        z-index:9999999999999;
+        position:fixed;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        max-width:100%;
+        max-height:100%;
+      }
+
       .acf-editor-wrap iframe {
         height: 150px !important;
         min-height: 0 !important;
       }
-      .wp-media-buttons .insert-media {display:none;}
+      //.wp-media-buttons .insert-media {display:none;}
       .-top > .nolabel > .acf-label {display:none;}
       #commentstatusdiv {display:none;}
 
@@ -80,6 +92,10 @@ function bp_acf_admin_style() {
       .acf-field-group.nolabel {padding: 0 !important;}
       .acf-field-group.nolabel > .acf-input {padding: 0 !important;}
       .acf-field-group.nolabel > .acf-input > .acf-fields { border:none !important;}
+
+      .acf-field.nolabel > .acf-label {display:none !important;}
+      .acf-field.nolabel::before {display:none !important;}
+      .acf-field.nolabel > .acf-input {width:100% !important;}
 
     </style>
   ";
@@ -276,7 +292,8 @@ if (bp_is_local()) {
 
 // Lazy Loader Script
 
-$lazy_loader = (new Blueprint\Enqueue\Script('bp_lazy_loader_script','lazy-loader.js',BP));
+$lazy_loader = (new Blueprint\Enqueue\Script('bp_lazy_loader_script','lazy-loader.js',BP))
+  ->addAjax();
 
 // Site Search Script
 
@@ -307,7 +324,8 @@ function bp_get_posts() {
 
 function bp_get_part($base,$name=null) {
   ob_start();
-  get_template_part('parts/' . $base,$name);
+  $part = get_template_part('parts/' . $base,$name);
+
   return ob_get_clean();
 }
 
@@ -353,8 +371,6 @@ function bp_contact_form() {
   if ($user_email && $admin_email) {echo 'Message sent!';}
   else {echo 'There was a problem sending your message.';}
 
-  var_dump($form);
-
   wp_die();
 
 }
@@ -367,4 +383,72 @@ function limit_words($text,$limit=200) {
   array_pop($trunc);
   $trunc = implode(' ',$trunc) . ' ...';
   return $trunc;
+}
+
+add_action( 'wp_ajax_bp_ajax_load_posts', 'bp_ajax_load_posts' );
+add_action( 'wp_ajax_nopriv_bp_ajax_load_posts', 'bp_ajax_load_posts');
+
+function bp_ajax_load_posts() {
+
+  $args = $_POST['query_vars'];
+  $return = array();
+  $paged = $args['paged'];
+
+  if (!is_int($paged) || $paged < 1) {$paged = 1;}
+  $args['paged'] = $paged + 1;
+
+  $args['nopaging'] = false;
+  global $wp_query;
+  $wp_query = new \WP_Query($args);
+  global $post;
+
+
+  $posts = '';
+
+  if (have_posts()) :
+
+    while (have_posts()) : the_post();
+
+      $posts.= (new part\Card())
+        ->build();
+
+    endwhile;
+
+  else :
+    echo 'no posts';
+  endif;
+
+  // Next
+  $args['paged'] += 1;
+  $next = new \WP_Query($args);
+
+
+  $return['posts'] = $posts;
+  $return['query'] = $wp_query;
+  $return['next']  = $next->have_posts();
+
+  echo json_encode($return);
+
+  wp_die();
+
+}
+
+function my_acf_update_value($value,$post_id,$field) {
+  $key = $field['name'];
+  if (preg_match("/button.*link$/",$key)) {
+    $type = str_replace('_link','',$key);
+    $type = strstr($type,'button_');
+    $type = str_replace('button_','',$type);
+    $link_key = str_replace('_' . $type . '_','_',$key);
+    update_post_meta($post_id,$link_key,$value);
+  }
+  return $value;
+} add_filter('acf/update_value', 'my_acf_update_value', 10, 3);
+
+add_filter( 'post_thumbnail_html', 'remove_width_attribute', 10 );
+add_filter( 'image_send_to_editor', 'remove_width_attribute', 10 );
+
+function remove_width_attribute( $html ) {
+   $html = preg_replace( '/(width|height)="\d*"\s/', "", $html );
+   return $html;
 }

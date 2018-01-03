@@ -31,6 +31,11 @@ class Group {
     add_action('init',array($this,'register'));
   }
 
+  function addFlexibleContent($name) {
+    $field = (new Field\FlexibleContent($name,$this));
+    return $this->addField($field,true);
+  }
+
   function addRepeater($name) {
     $field = (new Field\Repeater($name,$this));
     return $this->addField($field,true);
@@ -101,6 +106,13 @@ class Group {
   function setPosition($position) {
     if ($position == 'high') {$position = 'acf_after_title';}
     $this->group['position'] = $position;
+    return $this;
+  }
+
+  function setStyle($style='default') {
+    $options = array('default','seamless');
+    if (!in_array($style,$options)) {$style = 'default';}
+    $this->group['style'] = $style;
     return $this;
   }
 

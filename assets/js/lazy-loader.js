@@ -7,8 +7,6 @@ function psInit() {
  psLoadImages();
 }
 
-console.log(archive.query_vars);
-
 // Main Class
 class Presto {
 
@@ -95,5 +93,41 @@ class Presto {
 }
 
 var presto = new Presto();
+
+class AjaxLoadPosts {
+
+  constructor() {
+    this.$loadMore = $('.load-more-posts');
+    this.watchLoadMore();
+  }
+
+  watchLoadMore() {
+    var self = this;
+    self.$loadMore.click(function(e) {
+      var $loadMore      = $(this),
+          $gridContainer = $loadMore.closest('.grid-container'),
+          $grid          = $gridContainer.find('.post-grid');
+      e.preventDefault();
+      var data = {
+        'action'     : 'bp_ajax_load_posts',
+        'query_vars' : archive.query_vars
+      };
+      $loadMore.text('Loading...');
+      $.post(
+        ajax.url,
+        data
+      ).success(function(r) {
+        r = JSON.parse(r);
+        $grid.append(r.posts);
+        if (r.next == false) {$loadMore.remove();}
+        else {$loadMore.text($loadMore.attr('data-label'));}
+        $(window).scroll();
+      });
+    });
+  }
+
+}
+
+var ajaxLoadPosts = new AjaxLoadPosts();
 
 }); // End jQuery

@@ -15,12 +15,22 @@ class Page extends bp\Template {
 
   function setIntro($name='intro',$chain=false) {
     $intro = (new part\Section('intro'))
-      ->setClass('center')
+      ->setClass('center');
+
+    $wrap = $intro
       ->addWrap('blog')
         ->addClass('center intro')
         ->addHeadline()
-        ->addCopy()
-        ->end();
+        ->addCopy();
+
+    $button = get_field('intro_button');
+
+    if ($button) {
+      $wrap->addButton()
+        ->setType('primary')
+        ->setField($button);
+    }
+
     $this->intro = $intro;
     if ($chain) {return $this->intro;}
     else {return $this;}

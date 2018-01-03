@@ -9,8 +9,10 @@ class Part {
 
   protected $atts = array();
   protected $build;
+  protected $debugId;
   protected $field;
   protected $id;
+  protected $linkType;
   protected $part;
   protected $parts = array();
   protected $prefix;
@@ -19,15 +21,7 @@ class Part {
   protected $tag;
 
   function __construct($name='',$parent=null) {
-    // if (strpos($name,'-')) {
-    //   diedump($name);
-    //   $name = explode('-',$name);
-    //   $this->prefix = $name[0] . '_';
-    //   $this->name = $name[1];
-    // } else {
-    //   $this->name= $name;
-    // }
-    $this->name = $name;
+    $this->setName($name);
     $this->title = ucwords($this->name);
     if ($parent) {
       $this->setParent($parent);
@@ -53,7 +47,7 @@ class Part {
     return $this->addPart($part,$chain);
   }
 
-  function addImage($name='',$chain=false) {
+  function addImage($name='',$chain=true) {
     $part = (new Image());
     return $this->addPart($part,$chain);
   }
@@ -90,8 +84,21 @@ class Part {
   //   }
   // }
 
+  // function getLinkType() {
+  //   if (!$this->linkType) {$this->setLinkType();}
+  //   return $this->linkType;
+  // }
+
+  function getAttr($attr) {
+    return $this->atts[$attr] ?? false;
+  }
+
   function getName() {
     return $this->name;
+  }
+
+  function getParts() {
+    return $this->parts;
   }
 
   protected function initPart($part) {
@@ -224,6 +231,24 @@ class Part {
     return $this;
   }
 
+  function setLink($link=null,$link_type=null) {
+    if (!$link_type) {
+      $link_type = $this->field['link_type'] ?? 'section';
+    }
+    if (!$link) {
+      $link = $this->field[$link_type . '_link'] ?? 'next';
+    }
+
+    switch ($link_type) {
+      case 'internal': $link = get_permalink($link); break;
+      case 'external': $this->setAttr('target','_blank'); break;
+      case 'section' : $link = '#section-' . $link; break;
+      default : $link = '#section-next';
+    }
+    $this->setAttr('href',$link);
+    return $this;
+  }
+
   function preparePart($part) {
     if (!$part) {
       $part = (new Part(null,$this));
@@ -283,8 +308,27 @@ class Part {
     return $this;
   }
 
+  // function setLinkType($type=null) {
+  //   $types = array(
+  //     'internal',
+  //     'external',
+  //     'section'
+  //   );
+  //   if (!$type) {
+  //     $type = $this->field['link_type'] ?? 'section';
+  //   }
+  //   if (!in_array($type,$types)) {wp_die('Part setLinkType invalid type');}
+  //   $this->linkType = $type;
+  //   return $this;
+  // }
+
+  function setDebugId($id) {
+    $this->debugId = $id;
+    return $this;
+  }
+
   function setName($name=null) {
-    $this->name = $name;
+    if ($name) {$this->name = $name;}
     return $this;
   }
 
@@ -319,38 +363,42 @@ class Part {
     }
 
     // Get part or parts
-    if ($this->part) {$body = $this->part;}
-    else {$body = $this->buildParts();}
-    $body = $this->buildParts($body);
+    if ($this->part) {$parts = $this->part;}
+    else {$parts = $this->buildParts();}
+    $parts = $this->buildParts($parts);
 
     // Tag
-    if (empty($this->tag)) {$this->setTag();}
-    $tag = $this->tag;
+    if (!isset($this->tag)) {$this->setTag();}
 
-    // Id
-    if ($this->id) {$id = "id='$this->id'";}
-    else {$id = null;}
+    if (!$this->tag) {
+      return $parts;
+    } else {
+      // Id
+      if ($this->id) {$id = "id='$this->id'";}
+      else {$id = null;}
 
-    // Attributes
-    if ($this->atts) {
-      if (is_string($this->atts)) {
-        $atts = $this->atts;
-      } else {
-        $atts = '';
-        foreach ($this->atts as $key => $val) {
-          if ($val !== false) {
-            $atts .= " " . $key . '="' . $val . '"';
+      // Attributes
+      if ($this->atts) {
+        if (is_string($this->atts)) {
+          $atts = $this->atts;
+        } else {
+          $atts = '';
+          foreach ($this->atts as $key => $val) {
+            if ($val !== false) {
+              $atts .= " " . $key . '="' . $val . '"';
+            }
           }
         }
-      }
-    } else {$atts = null;}
+      } else {$atts = null;}
 
-    // Build
-    return $this->addTag(
-      $body,
-      $this->tag,
-      $atts
-    );
+      // Build
+      return $this->addTag(
+        $parts,
+        $this->tag,
+        $atts
+      );
+    }
+
   }
 
   protected function addTag($string,$tag,$atts) {

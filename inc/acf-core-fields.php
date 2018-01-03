@@ -177,6 +177,7 @@ $intro = (new Group('intro'))
   ->addGroup('intro')
     ->addHeadline()
     ->addCopy()
+    ->addButton()
     ->end()
   ->setLocation('page')
   ->setOrder('high');
@@ -229,3 +230,13 @@ $form_elements = (new Group('form_elements'))
 
 // $iframe_elements = (new Group('iframe_elements'))
 //   ->
+
+// $post_content = (new Group('post_content'))
+//   ->addFlexibleContent('post_content')
+//     ->setButtonLabel('Add Content')
+//     // Layouts
+//     ->addLayout('paragraph')
+//       ->addWysiwyg('text')
+//       ->end()
+//     ->end()
+//   ->setLocation('article');

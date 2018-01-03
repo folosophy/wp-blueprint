@@ -42,7 +42,7 @@ function fsyAnchorScroll() {
     }
     // Scroll to target
     if ($target.length == 1) {
-      console.log($target);
+      $(window).scroll();
       $('html,body').animate({
         scrollTop: $target.offset().top
       },500);

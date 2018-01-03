@@ -25,4 +25,12 @@ class Event extends template\Single {
     }
   }
 
+  function setRecentPosts() {
+    parent::setRecentPosts();
+    if (!$this->recentPosts) {return $this;}
+    $this->recent_posts_grid
+      ->setArg('meta_key','event_start')
+      ->setArg('orderby','event_start');
+  }
+
 }

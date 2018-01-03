@@ -142,7 +142,7 @@ class Single extends \Blueprint\Template {
 
   function setPostMeta() {
     $this->postMeta = (new part\Part())
-      ->setClass('post__meta');
+      ->setClass('post-header__meta');
   }
 
   function setRecentPosts() {
@@ -155,7 +155,7 @@ class Single extends \Blueprint\Template {
 
     $recent_posts_label =
       $this->postTypeObject->labels->recent_posts ??
-      $this->postTypeObject->labels->name;
+      'Recent ' . $this->postTypeObject->label;
 
     $posts->addPart()
       ->setClass('headline-primary')
@@ -169,6 +169,7 @@ class Single extends \Blueprint\Template {
       ->setPostType()
       ->setCols(bp_var('recent_posts_numberposts',3))
       ->setNumberPosts(bp_var('recent_posts_numberposts',3));
+    $this->recent_posts_grid = $post_grid;
 
     $posts->insertPartAfter($post_grid);
 
@@ -183,7 +184,7 @@ function setPostSidebar() {
 
   function setTitle() {
     $this->title = (new part\Part())
-      ->setTag('h2')
+      ->setTag('h1')
       ->setClass('post-title post-header__title')
       ->addPart()
         ->setTag('span')
@@ -217,7 +218,7 @@ function setPostSidebar() {
   }
 
   protected function buildPostMeta() {
-    $this->getPostHeader()->insertPart($this->getPostMeta());
+    $this->getPostHeader()->insertPartAfter($this->getPostMeta());
   }
 
   protected function buildPostSidebar() {

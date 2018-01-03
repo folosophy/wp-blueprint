@@ -16,6 +16,11 @@ class Header extends Part {
     $this->setMeta();
   }
 
+  function getNav() {
+    if (!isset($this->nav)) {$this->setNav();}
+    return $this->nav;
+  }
+
   function setNav($name=null,$chain=true) {
     $nav = (new NavMain());
     $this->nav = $nav;

@@ -15,6 +15,11 @@ class PostGrid extends Grid {
     parent::init();
     $this->setCols(bp_var('post_grid_columns',3));
     $this->setArgs();
+    $this->getGrid()->addClass('post-grid');
+  }
+
+  function addItem($item) {
+    $this->items .= $item;
   }
 
   function getArgs() {
@@ -66,14 +71,17 @@ class PostGrid extends Grid {
 
     foreach ($posts as $post) : setup_postdata($post);
       // TODO: Include post object in any files that need it?
-      $po = get_post_type_object(get_post_type());
-      if (isset($po->card)) {
-        $class = $po->card;
-        $card = (new $class());
-      } else {
-        $card = new Card();
-      }
-      $this->addItem($card->build());
+      // $po = get_post_type_object(get_post_type());
+      // if (isset($po->card)) {
+      //   $class = $po->card;
+      //   $card = (new $class());
+      // } else {
+      //   $card = new Card();
+      // }
+      // $this->addItem($card->build());
+      $card = bp_get_part('card',get_post_type());
+      if (!$card) {$card = (new Card())->build();}
+      $this->addItem($card);
     endforeach; wp_reset_postdata();
 
   }
@@ -104,19 +112,32 @@ class PostGrid extends Grid {
     return $this;
   }
 
+  function isArchive($bool=true) {
+    if ($bool == true) {
+      add_action('wp_enqueue_scripts',array($this,'localizeLoadMore'));
+    }
+    return $this;
+  }
+
+  function localizeLoadMore() {
+    $query = $this->getQuery();
+    wp_localize_script('bp_lazy_loader_script','archive',array('query_vars'=>$query->query_vars));
+  }
+
   function prepareLoadMore() {
     if ($this->query->max_num_pages > 1) {
       $this->addPart()
         ->setClass('center')
         ->addPart()
           ->addHtml('Load More')
-          ->setClass('load-more-posts');
+          ->setClass('load-more-posts')
+          ->setAttr('data-label','Load More');
     }
   }
 
   protected function prepareItems() {
     if (empty($this->items)) {$this->setItems();}
-    $this->getGrid()->addHtml($this->items);
+    $this->getGrid()->insertPart($this->items);
   }
 
   function buildInit() {

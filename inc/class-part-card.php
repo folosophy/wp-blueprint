@@ -22,6 +22,7 @@ class Card extends Part {
     $this->setType();
     $this->setAttr('href',get_the_permalink());
     $this->setLazy();
+    $this->addClass('card-' . get_post_type());
   }
 
   protected function setBody() {
@@ -40,7 +41,7 @@ class Card extends Part {
 
   protected function setContent() {
     $this->setTitle();
-    $this->setSubHeadline();
+    if (!$this->subHeadline) {$this->setSubHeadline();}
 
     if (bp_var('card_excerpt') !== null) {
       $this->setExcerpt();

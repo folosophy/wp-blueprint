@@ -19,7 +19,7 @@ class Grid extends Part {
     return $this->initPart('grid');
   }
 
-  function addItem($item=null) {
+  function addItem($item) {
     $this->items .= "
       <div class='$this->colClass'>
         $item

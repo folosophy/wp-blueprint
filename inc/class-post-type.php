@@ -16,6 +16,8 @@ class PostType {
   protected $rewrite = array();
   protected $tags;
 
+  // postType: singular
+
   function __construct($postType,$plural=null) {
     $this->postType = $postType;
     $this->setLabel($postType);
@@ -176,6 +178,7 @@ class PostType {
   function setSlug($slug=null) {
     if (!$slug) {$slug = $this->name;}
     $this->rewrite['slug'] = $slug;
+    $this->rewrite['with_front'] = false;
     return $this;
   }
 

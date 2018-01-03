@@ -50,6 +50,11 @@ class Field {
     return $this->field['type'];
   }
 
+  function hideLabel() {
+    $this->addClass('nolabel');
+    return $this;
+  }
+
   function setLogic($key=null,$value=null,$operator='==') {
     $logic = (new acf\Logic($this));
     $this->logic = $logic;

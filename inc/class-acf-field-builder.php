@@ -26,7 +26,7 @@ trait FieldBuilder {
     $field = (new Field\Group($name,$this));
     $sub_fields = $field
       ->addText('label')
-      ->addSelect('link_target')
+      ->addSelect('link_type')
         ->setChoices(array(
           'external' => 'External (Another Website)',
           'internal' => 'Internal (Your Website)',
@@ -34,10 +34,13 @@ trait FieldBuilder {
         ))
         ->endSelect()
       ->addUrl('external_link',true)
-        ->setLogic('link_target','external')
+        ->setLogic('link_type','external')
         ->end()
       ->addPostObject('internal_link',true)
-        ->setLogic('link_target','internal')
+        ->setLogic('link_type','internal')
+        ->end()
+      ->addText('section_link',true)
+        ->setLogic('linke_type','section')
         ->end();
     return $this->addField($field,$chain);
   }
