@@ -66,16 +66,6 @@ function bp_acf_admin_style() {
   echo "
     <style>
 
-      #acf-group_post_content {
-        z-index:9999999999999;
-        position:fixed;
-        top:50%;
-        left:50%;
-        transform:translate(-50%,-50%);
-        max-width:100%;
-        max-height:100%;
-      }
-
       .acf-editor-wrap iframe {
         height: 150px !important;
         min-height: 0 !important;
@@ -95,6 +85,7 @@ function bp_acf_admin_style() {
 
       .acf-field.nolabel > .acf-label {display:none !important;}
       .acf-field.nolabel::before {display:none !important;}
+      .acf-field.nolabel {padding-left: 0 !important;}
       .acf-field.nolabel > .acf-input {width:100% !important;}
 
     </style>
@@ -322,10 +313,14 @@ function bp_get_posts() {
   wp_die();
 }
 
-function bp_get_part($base,$name=null) {
+function bp_get_part($base,$name=null,$plugin=null) {
   ob_start();
   $part = get_template_part('parts/' . $base,$name);
-
+  // if (!$part {
+  //   $file = $base;
+  //   if ($name) {$file = $file . '-' . $name;}
+  //   diedump($file);
+  // }
   return ob_get_clean();
 }
 
@@ -393,15 +388,13 @@ function bp_ajax_load_posts() {
   $args = $_POST['query_vars'];
   $return = array();
   $paged = $args['paged'];
-
-  if (!is_int($paged) || $paged < 1) {$paged = 1;}
-  $args['paged'] = $paged + 1;
-
   $args['nopaging'] = false;
-  global $wp_query;
-  $wp_query = new \WP_Query($args);
-  global $post;
 
+  if ((int) $paged < 2) {$args['paged'] = 2;}
+
+  global $wp_query;
+  global $post;
+  $wp_query = new \WP_Query($args);
 
   $posts = '';
 
@@ -424,9 +417,9 @@ function bp_ajax_load_posts() {
 
 
   $return['posts'] = $posts;
-  $return['query'] = $wp_query;
+  $return['query'] = $next;
+  $return['query_vars'] = $next->query_vars;
   $return['next']  = $next->have_posts();
-
   echo json_encode($return);
 
   wp_die();

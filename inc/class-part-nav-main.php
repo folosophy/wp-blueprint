@@ -109,7 +109,7 @@ class NavMain extends Part {
   function setBrandLogo($file) {
     // TODO: check for for png, etc
     $logo = \bp_get_theme_img($file,'nav-main__logo');
-    $this->logos = $logo . $this->brand;
+    $this->brandLogo = $logo;
     return $this;
   }
 
@@ -141,27 +141,27 @@ class NavMain extends Part {
     $this->insertPart($this->getMobileMenu());
   }
 
+  protected function prepareToggle() {
+    $toggle = (new Part())
+      ->setClass('menu-main__toggle')
+      ->addHtml("
+        <span class='menu-main__toggle__label'>MENU</span>
+        <div class='menu-main__toggle__icon'>
+          <div class='menu-main__toggle__top'></div>
+          <div class='menu-main__toggle__mid'></div>
+          <div class='menu-main__toggle__bot'></div>
+        </div>
+      ");
+    $this->insertPart($toggle);
+  }
+
   function build() {
     $this->prepareBrand();
     $this->prepareMobileMenu();
+    $this->prepareToggle();
     return parent::build();
   }
 
-  // function getSiteName($type='raw') {
-  //   if ($this->siteName == false) {return null;}
-  //   elseif ($type == 'raw') {return $this->siteName}
-  //   $this->siteName = "<div class='nav-main__name'>$name</div>";
-  // }
-  //
-  // function setSiteName($name=null) {
-  //   if ($name == null) {$name = get_bloginfo('name');}
-  //   $this->siteName = $name;
-  //   return $this;
-  // }
-
-//   function init() {
-//     $this->navClass = 'nav-' . $this->type;
-//   }
 //
 //   function addMenuButton($label,$link) {
 //     $this->button = "
@@ -272,14 +272,7 @@ class NavMain extends Part {
 //           $menuMain
 //           $this->social
 //
-//           <div class='menu-main__toggle'>
-//             <span class='menu-main__toggle__label'>MENU</span>
-//             <div class='menu-main__toggle__icon'>
-//               <div class='menu-main__toggle__top'></div>
-//               <div class='menu-main__toggle__mid'></div>
-//               <div class='menu-main__toggle__bot'></div>
-//             </div>
-//           </div>
+//
 //
 //         </div>
 //       </nav>
@@ -391,7 +384,11 @@ class MenuItem extends Part {
   }
 
   function setLabel($label=null) {
-    if (!$label) {$label = $this->post->post_title;}
+    if (!$label && $this->post) {$label = $this->post->post_title;}
+    $label = (new Part())
+      ->setClass('menu-main__item__label')
+      ->setTag('a')
+      ->addHtml($label);
     $this->label = $label;
     return $this;
   }
@@ -402,14 +399,18 @@ class MenuItem extends Part {
   }
 
   protected function prepareLabel() {
-    $label = (new Part())
-      ->setClass('menu-main__item__label')
-      ->addHtml($this->getLabel());
-    $this->insertPart($label);
+    $this->insertPart($this->getLabel());
+  }
+
+  protected function prepareLink() {
+    if ($this->post) {
+      $this->getLabel()->setLink($this->post->ID,'internal');
+    }
   }
 
   function build() {
     $this->prepareLabel();
+    $this->prepareLink();
     return parent::build();
   }
 
@@ -448,13 +449,23 @@ class MainMenu extends Part {
     return $this;
   }
 
-  function addMenuItem($item) {
+  function addMenuItem($item,$chain=false) {
+    $menuItem = (new MenuItem(null,$this));
     if (is_int($item)) {
       $item = get_post($item);
+      $menuItem->setPost($item);
+    } elseif (is_string($item)) {
+      $menuItem->setLabel($item);
     }
-    $item = (new MenuItem())
-      ->setPost($item);
-    $this->getItems()->insertPart($item);
+    $this->getItems()->insertPart($menuItem);
+    if ($chain) {return $menuItem;}
+    else {return $this;}
+  }
+
+  function setButton($label,$chain=true) {
+    $button = $this->addMenuItem($label,true)
+      ->setClass('menu-main__button');
+    return $button;
   }
 
   protected function prepareItems() {

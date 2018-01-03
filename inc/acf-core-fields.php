@@ -163,6 +163,7 @@ $text_elements = (new Group('text_elements'))
   ->setLocation('post');
 
 $personal_info_elements = (new Group('personal_info'))
+  ->addImage('profile_photo')
   ->addText('first_name')
   ->addText('middle_name',true)
     ->setRequired(0)

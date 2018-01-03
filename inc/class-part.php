@@ -9,6 +9,7 @@ class Part {
 
   protected $atts = array();
   protected $build;
+  protected $defaultBuild;
   protected $debugId;
   protected $field;
   protected $id;
@@ -57,11 +58,11 @@ class Part {
     return $this->addPart($part,$chain);
   }
 
-  function addContainer($type='main') {
+  function addContainer($type='main',$chain=true) {
     $class='container-' . $type;
-    $container = (new Part())
+    $part = (new Part())
       ->setClass($class);
-    return $this->addPart($container,true);
+    return $this->addPart($part,$chain);
   }
 
   function addPostGrid($name=null,$chain=true) {

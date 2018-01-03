@@ -43,10 +43,13 @@ class Card extends Part {
     $this->setTitle();
     if (!$this->subHeadline) {$this->setSubHeadline();}
 
-    if (bp_var('card_excerpt') !== null) {
+    // If excerpts enabled
+    if (bp_var('card_excerpt') && $this->excerpt !== false) {
       $this->setExcerpt();
       if ($this->excerpt) {$excerpt = "<p class='p2'>$this->excerpt</p>";}
       else {$excerpt = null;}
+    } else {
+      $excerpt = null;
     }
 
     $this->content = "
@@ -59,6 +62,10 @@ class Card extends Part {
   }
 
   function setExcerpt($excerpt=null) {
+    if ($excerpt == false) {
+      $this->excerpt = false;
+      return $this;
+    }
     if (!$excerpt) {$excerpt = get_the_excerpt();}
     if ($excerpt) {
       $excerpt = wp_strip_all_tags($excerpt,true);

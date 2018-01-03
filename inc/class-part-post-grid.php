@@ -5,7 +5,7 @@ use Blueprint as bp;
 
 class PostGrid extends Grid {
 
-  protected $args;
+  protected $args = array();
   protected $numPosts;
   protected $postType = 'post';
   protected $query;
@@ -13,21 +13,22 @@ class PostGrid extends Grid {
 
   protected function init() {
     parent::init();
-    $this->setCols(bp_var('post_grid_columns',3));
-    $this->setArgs();
+    $this->setLoadMore(false);
     $this->getGrid()->addClass('post-grid');
   }
 
-  function addItem($item) {
-    $this->items .= $item;
+  function getArg($arg) {
+    $args = $this->getArgs();
+    return $args[$arg] ?? false;
   }
 
   function getArgs() {
+    if (!isset($this->args)) {$this->setArgs();}
     return $this->args;
   }
 
   function getQuery() {
-    if (!$this->query) {$this->query = (new \WP_Query($this->args));}
+    if (!isset($this->query)) {$this->setQuery();}
     return $this->query;
   }
 
@@ -37,13 +38,24 @@ class PostGrid extends Grid {
   }
 
   function setArgs($args=null) {
-    if (!$args) {
-      $args  = array(
-        'post_type'      => $this->postType,
-        'posts_per_page' => 9
-      );
+    if (!is_array($args)) {$args = array();}
+    $this->args = $args;
+  }
+
+  function setQuery() {
+    $args = $this->args;
+    if (!isset($this->args['post__not_in'])) {$this->setNotIn();}
+    $this->args = $args;
+    $this->query = new \WP_Query($args);
+  }
+
+  function setLoadMore($bool) {
+    $this->loadMore = (bool) $bool;
+    if ($bool) {
+      $this->setQuery();
+    } else {
+      $this->args['max_num_pages'] = 1;
     }
-    $this->args= $args;
     return $this;
   }
 
@@ -53,37 +65,16 @@ class PostGrid extends Grid {
     return $this;
   }
 
-  function setItemBuilder($class=null) {
-    if (!$class) {$class = 'Blueprint\Part\Card';}
-    $this->itemBuilder = $class;
-    return $this;
-  }
+  function prepareItems() {
+    $query = $this->getQuery();
 
-  function setItems($items=null) {
-
-    if (!$items) {
-      $this->setItemBuilder();
-    }
-
-    $query = new \WP_Query($this->args);
-    $this->query = $query;
     $posts = $query->posts; global $post;
-
     foreach ($posts as $post) : setup_postdata($post);
-      // TODO: Include post object in any files that need it?
-      // $po = get_post_type_object(get_post_type());
-      // if (isset($po->card)) {
-      //   $class = $po->card;
-      //   $card = (new $class());
-      // } else {
-      //   $card = new Card();
-      // }
-      // $this->addItem($card->build());
-      $card = bp_get_part('card',get_post_type());
-      if (!$card) {$card = (new Card())->build();}
-      $this->addItem($card);
+    $item = bp_get_part('card',get_post_type());
+    if (!$item) {diedump('No card found');}
+    $this->addItem($item);
     endforeach; wp_reset_postdata();
-
+    $this->getGrid()->insertPart($this->items);
   }
 
   function setNotIn($ids = null) {
@@ -115,17 +106,18 @@ class PostGrid extends Grid {
   function isArchive($bool=true) {
     if ($bool == true) {
       add_action('wp_enqueue_scripts',array($this,'localizeLoadMore'));
+      $this->setLoadMore(true);
     }
     return $this;
   }
 
   function localizeLoadMore() {
-    $query = $this->getQuery();
+    $query = $this->query;
     wp_localize_script('bp_lazy_loader_script','archive',array('query_vars'=>$query->query_vars));
   }
 
   function prepareLoadMore() {
-    if ($this->query->max_num_pages > 1) {
+    if ($this->loadMore) {
       $this->addPart()
         ->setClass('center')
         ->addPart()
@@ -135,13 +127,7 @@ class PostGrid extends Grid {
     }
   }
 
-  protected function prepareItems() {
-    if (empty($this->items)) {$this->setItems();}
-    $this->getGrid()->insertPart($this->items);
-  }
-
   function buildInit() {
-    if (!isset($this->args['post__not_in'])) {$this->setNotIn();}
     $this->prepareItems();
     $this->prepareLoadMore();
   }

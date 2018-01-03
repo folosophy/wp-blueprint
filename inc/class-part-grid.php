@@ -20,11 +20,8 @@ class Grid extends Part {
   }
 
   function addItem($item) {
-    $this->items .= "
-      <div class='$this->colClass'>
-        $item
-      </div>
-    ";
+    // TODO: convert to part array?
+    $this->items .= $item;
     return $this;
   }
 

@@ -118,6 +118,8 @@ class AjaxLoadPosts {
         data
       ).success(function(r) {
         r = JSON.parse(r);
+        console.log(r);
+        archive.query_vars = r.query_vars;
         $grid.append(r.posts);
         if (r.next == false) {$loadMore.remove();}
         else {$loadMore.text($loadMore.attr('data-label'));}

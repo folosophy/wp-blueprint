@@ -22,7 +22,10 @@ class Template extends part\Part {
   function setTemplateType() {
     global $post;
     if (is_single())   {$class = 'single_' . get_post_type();}
-    elseif (is_page()) {$class = 'page-' . $post->post_name;}
+    elseif (is_page()) {
+      $class  = 'page-' . $post->post_name;
+      $class .= ' body-page';
+    }
     $this->addClass($class);
   }
 
@@ -104,9 +107,9 @@ class Template extends part\Part {
 
   function buildBody() {
     if (!isset($this->body)) {$this->setBody();}
-    if (!$this->head) {$this->setHead();}
-    $this->addPart($this->head);
     $this->addPart($this->body);
+    if (!$this->head) {$this->setHead();}
+    $this->insertPartBefore($this->head);
     // Nav
     $nav = (new part\Part())
       ->setTag(false)
