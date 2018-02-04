@@ -8,6 +8,16 @@ class Icon extends Part {
 
   protected function init() {
     $this->setTag('img');
+    $this->setLazy(true);
+  }
+
+  function setAlt($alt=null) {
+    if (!$alt) {
+      $alt = pathinfo($this->getAttr('src'),PATHINFO_FILENAME);
+      $alt = ucwords(str_replace('-',' ',$alt));
+    }
+    $this->setAttr('alt',$alt);
+    return $this;
   }
 
   function setFile($file=null) {
@@ -23,7 +33,8 @@ class Icon extends Part {
 
   protected function buildInit() {
     if (!isset($this->atts['src'])) {$this->setSrc();}
-
+    if (!$this->getAttr('alt')) {$this->setAlt();}
+    if (!$this->getAttr('class')) {$this->setClass('img');}
   }
 
 }

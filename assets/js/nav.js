@@ -15,7 +15,7 @@ function fsyMobileNav() {
   $ham.click(function() {
     $body.toggleClass(mbOpen);
   });
-  $exit.on('click touchstart', function() {
+  $exit.on('click', function() {
     $body.removeClass(mbOpen);
   });
   $navAnchor.click(function() {
@@ -33,7 +33,7 @@ function fsyMobileNav() {
 function fsyAnchorScroll() {
 
   var $anchor = $('a[href^="#"]');
-  $anchor.on('click touchstart', function(e) {
+  $anchor.on('click', function(e) {
     e.preventDefault();
     var $that = $(this),
         $target = $($that.attr('href'));

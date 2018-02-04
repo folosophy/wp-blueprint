@@ -1,9 +1,8 @@
 <?php
 
-namespace Blueprint;
-use \Blueprint\Part as part;
+namespace Blueprint\Part;
 
-class Template extends part\Part {
+class Template extends Part {
 
   protected $head;
   protected $header;
@@ -15,18 +14,21 @@ class Template extends part\Part {
   protected function init() {
     wp_reset_query();
     $this->postType = get_post_type();
-    $this->setTag('body');
+    $this->setTag('html');
+    $this->setAttr('lang','en');
     $this->setTemplateType();
   }
 
   function setTemplateType() {
     global $post;
-    if (is_single())   {$class = 'single_' . get_post_type();}
-    elseif (is_page()) {
-      $class  = 'page-' . $post->post_name;
-      $class .= ' body-page';
+    if (is_single())   {
+      $this->addClass('single-' . get_post_type());
+      $this->addClass('body-single');
     }
-    $this->addClass($class);
+    elseif (is_page()) {
+      $this->addClass('page-' . $post->post_name);
+      $this->addClass('body-page');
+    }
   }
 
   function getBody() {
@@ -49,18 +51,18 @@ class Template extends part\Part {
   }
 
   function setBody() {
-    $this->body = (new part\Part())
+    $this->body = (new Part())
       ->setTag('body');
     return $this->body;
   }
 
   protected function setHead() {
-    $this->head = new part\Head();
+    $this->head = new Head();
   }
 
-  function setHero() {
-    $this->hero = (new part\Hero());
-    return $this;
+  function setHero($name=null) {
+    $this->hero = (new Hero($name));
+    return $this->hero;
   }
 
   protected function setPropPart($prop='parts') {
@@ -69,14 +71,7 @@ class Template extends part\Part {
   }
 
   protected function getFooter() {
-    ob_start();
-    get_template_part('parts/footer');
-    $footer = ob_get_clean();
-    $footer .= "
-      </body>
-      </html>
-    ";
-    return $footer;
+    return bp_get_part('footer');
   }
 
   protected function getPart($base,$part) {
@@ -100,6 +95,7 @@ class Template extends part\Part {
       $this->bodyClass .= 'page-' . $this->post->post_name;
       $type = 'page';
     }
+    elseif (is_search()) {}
     else {$type = 'index';}
     $this->bodyClass .= ' body-' . $type;
     return $this;
@@ -108,10 +104,8 @@ class Template extends part\Part {
   function buildBody() {
     if (!isset($this->body)) {$this->setBody();}
     $this->addPart($this->body);
-    if (!$this->head) {$this->setHead();}
-    $this->insertPartBefore($this->head);
     // Nav
-    $nav = (new part\Part())
+    $nav = (new Part())
       ->setTag(false)
       ->setName('nav')
       ->addHtml($this->getHeader());
@@ -129,7 +123,8 @@ class Template extends part\Part {
   }
 
   function build() {
-    //$this->buildHeader();
+    if (!$this->head) {$this->setHead();}
+    $this->insertPartBefore($this->head);
     $this->buildHero();
     $this->buildBody();
     $this->buildFooter();

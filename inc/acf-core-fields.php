@@ -2,98 +2,11 @@
 
 namespace Blueprint\Acf;
 
-$date_elements = (new Group('date_elements'))
-  ->addSelect('dotw')
-    ->setLabel('Day of the Week')
-    ->setChoices(array(
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-      'Sunday'
-    ))
-    ->end();
-
-$featured_media = (new Group('featured_media'))
-  ->setPosition('high')
-  ->setLabelPlacement('left')
-  // Featured Media Group
-  ->addGroup('featured_media')
-    ->setLayout('row')
-    ->addSelect('format')
-      ->setChoices(array('image','video'))
-      ->end()
-    ->addTip('Set the Featured Image on the right.',true)
-      ->setLogic('format','image')
-      ->end()
-    ->addClone('video','field_video',true)
-      ->setDisplay('group')
-      ->setLogic('featured_media_format','video')
-      ->end()
-    ->endGroup()
-    //->dumpFields()
-  ->setLocation(apply_filters('bp_featured_media_location',array('post')));
-
-// Video
-
-$video = (new Group('video'))
-  ->addGroup('video')
-    ->addSelect('host')
-      ->setChoices(array('youtube'=>'YouTube','vimeo'))
-      ->setDefaultValue('youtube')
-      ->endSelect()
-    // YouTube ID
-    ->addText('youtube_id',true)
-      ->setLabel('Link')
-      ->setPrepend('youtube.com/watch?v=')
-      ->setPlaceholder('T-YqcuatM6I')
-      ->setLogic()
-        ->addCondition('host','youtube')
-        ->endLogic()
-      ->endText()
-    // Video ID
-    ->addText('vimeo_id',true)
-      ->setLabel('Link')
-      ->setPrepend('vimeo.com/')
-      ->setPlaceholder('227138298')
-      ->setLogic()
-        ->addCondition('host','vimeo')
-        ->endLogic()
-      ->endText()
-    ->addImage('thumbnail',true)
-      ->setRequired(0)
-      ->setInstructions('Optional')
-      ->end()
-    ->endGroup();
-
-    // ->addMessage('')
-    // ->addSelect('source')
-    //   ->setChoices(array(
-    //     'youtube' => 'YouTube',
-    //     'vimeo'
-    //   ))
-    //   ->endSelect()
-    // ->addText('youtube_id',true)
-    //   ->setLabel('Video ID')
-    //   ->setLogic('source','youtube')
-    //   ->setPrepend('youtube.com/watch?v=')
-    //   ->setPlaceholder('AxG14lbL2Iw')
-    //   ->endText()
-    // ->addText('vimeo_id',true)
-    //   ->setLabel('Video ID')
-    //   ->setPrepend('vimeo.com/')
-    //   ->setPlaceholder('237748768')
-    //   ->setLogic('source','vimeo')
-    //   ->endText()
-
-    // return $this;
-
 // Hero
 
 $hero = (new Group('hero'))
   ->setOrder('top')
+  ->setPosition('high')
   ->setLocation('page');
 
 $hero_group = $hero->addGroup('hero')
@@ -135,6 +48,112 @@ $hero_group
       ->endLogic()
     ->end();
 
+$date_elements = (new Group('date_elements'))
+  ->addSelect('dotw')
+    ->setLabel('Day of the Week')
+    ->setChoices(array(
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ))
+    ->end();
+
+$featured_media = (new Group('featured_media'))
+  ->setPosition('side')
+  ->setLabelPlacement('top');
+
+  $fg_featured_media = $featured_media
+    ->addGroup('featured_media')
+      ->hideLabel(true)
+      ->setLayout('block');
+
+    apply_filters('bp/field/featured_media',$fg_featured_media);
+
+    $fg_featured_media
+      ->addSelect('format')
+        ->setChoices(array('image','video'))
+        ->end()
+      ->addImage('image',true)
+        ->setLabel('Image')
+        ->setLogic('format','image')
+        ->addSaveKey('_thumbnail_id')
+        ->end()
+      ->addVideo('video',true)
+        ->setLogic('format','video')
+        ->end();
+
+  apply_filters('bp_group_featured_media',$featured_media);
+
+  add_action('acf/load_value/key=field_featured_media_image',function($val) {
+    $val = get_post_thumbnail_id();
+    return $val;
+  });
+
+  // add_action('acf/load_field/key=field_featured_media_format',function($field) {
+  //   var_dump($field);
+  //   return $field;
+  // },99999);
+
+// Video
+
+// $video = (new Group('video'))
+//   ->addGroup('video')
+//     ->addSelect('host')
+//       ->setChoices(array('youtube'=>'YouTube','vimeo'))
+//       ->setDefaultValue('youtube')
+//       ->endSelect()
+//     // YouTube ID
+//     ->addText('youtube_id',true)
+//       ->setLabel('Video ID')
+//       ->setPrepend('watch?v=')
+//       ->setPlaceholder('T-YqcuatM6I')
+//       ->setLogic()
+//         ->addCondition('host','youtube')
+//         ->endLogic()
+//       ->endText()
+//     // Video ID
+//     ->addText('vimeo_id',true)
+//       ->setLabel('Video ID')
+//       ->setPrepend('vimeo.com/')
+//       ->setPlaceholder('227138298')
+//       ->setLogic()
+//         ->addCondition('host','vimeo')
+//         ->endLogic()
+//       ->endText()
+//     ->addImage('thumbnail',true)
+//       ->setRequired(0)
+//       ->setInstructions('Optional')
+//       ->end()
+//     ->endGroup();
+
+    // ->addMessage('')
+    // ->addSelect('source')
+    //   ->setChoices(array(
+    //     'youtube' => 'YouTube',
+    //     'vimeo'
+    //   ))
+    //   ->endSelect()
+    // ->addText('youtube_id',true)
+    //   ->setLabel('Video ID')
+    //   ->setLogic('source','youtube')
+    //   ->setPrepend('youtube.com/watch?v=')
+    //   ->setPlaceholder('AxG14lbL2Iw')
+    //   ->endText()
+    // ->addText('vimeo_id',true)
+    //   ->setLabel('Video ID')
+    //   ->setPrepend('vimeo.com/')
+    //   ->setPlaceholder('237748768')
+    //   ->setLogic('source','vimeo')
+    //   ->endText()
+
+    // return $this;
+
+
+
 $site_info = (new Group('site_info'))
   ->setLocation('site-options','options_page')
   ->addGroup('site')
@@ -162,6 +181,30 @@ $text_elements = (new Group('text_elements'))
   ->addText('headline')
   ->setLocation('post');
 
+$g_user = (new Group('user'))
+  ->setTitle('Basic Info')
+  ->setLocation('all','user_form');
+
+  $user = $g_user->addGroup('user');
+
+    $user->addImage('profile_photo',true);
+    //
+    // $user->addText('first_name',true);
+    //
+    // $user->addText('middle_name',true)
+    //   ->setRequired(0)
+    //   ->end();
+    //
+    // $user->addText('last_name',true)
+    //   ->addSaveKey('last_name');
+    //
+    // $user->addText('title');
+    //
+    // $user->addText('company');
+    //
+    // $user->addWysiwyg('bio');
+
+
 $personal_info_elements = (new Group('personal_info'))
   ->addImage('profile_photo')
   ->addText('first_name')
@@ -178,10 +221,20 @@ $intro = (new Group('intro'))
   ->addGroup('intro')
     ->addHeadline()
     ->addCopy()
-    ->addButton()
+    ->addTrueFalse('button_enabled',true)
+      ->setLabel('Enable Button')
+      ->end()
+    ->addButton('button',true)
+      ->setLogic('button_enabled',true)
+      ->end()
     ->end()
   ->setLocation('page')
+  ->setPosition('high')
   ->setOrder('high');
+
+$intro = apply_filters('bp_group_intro',$intro);
+
+//diedump($intro->getLocation());
 
 // Events
 // TODO: MTF Activate with events class, etc
@@ -241,3 +294,32 @@ $form_elements = (new Group('form_elements'))
 //       ->end()
 //     ->end()
 //   ->setLocation('article');
+
+$guest_author = (new Group('guest_author'));
+
+  $guest_author
+    ->addTrueFalse('is_guest_author',true)
+      ->setLabel('Guest')
+      ->setInstructions('Is this a guest author?');
+
+  $field_guest_author = $guest_author
+    ->addGroup('guest_author')
+      ->addText('name')
+      ->addText('email')
+      ->addImage('image');
+
+  $field_guest_author->setLogic('is_guest_author',true);
+
+apply_filters('bp_group_guest_author',$guest_author);
+
+// Post Meta
+// TODO: conditional for different post types
+$g_meta = (new Group('meta'))
+  ->setLocation('work');
+
+  // TODO save key
+  $g_meta->addTextArea('excerpt');
+
+////////////////////////////////////////////////////////
+// OPTIONS
+////////////////////////////////////////////////////////

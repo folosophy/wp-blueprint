@@ -55,10 +55,10 @@ let search = new BlueprintSearch;
 
 
 
-$('.form-search').submit(function(e) {
+$('.form-site-search').submit(function(e) {
   e.preventDefault();
   var search = $(this).find('input[type="search"]').val();
-  location.search = '?q=' + search;
+  location = 'http://localhost/liveandrebel.com/?s=' + search;
 });
 
 class SearchPage {
@@ -71,22 +71,22 @@ class SearchPage {
   }
 
   watchButton() {
-    var self = this;
-    $('a.load-more-posts').click(function(e) {
-      e.preventDefault();
-      self.offset = self.$results.children().length + self.offset;
-      var query = {
-        'offset': self.offset
-      };
-      var data = {
-        'action': 'bp_get_posts',
-        'query': query
-      };
-      $.post(ajax.url, data, function(r) {
-    		self.$results.append(r);
-        console.log(r);
-    	});
-    });
+    // var self = this;
+    // $('a.load-more-posts').click(function(e) {
+    //   e.preventDefault();
+    //   self.offset = self.$results.children().length + self.offset;
+    //   var query = {
+    //     'offset': self.offset
+    //   };
+    //   var data = {
+    //     'action': 'bp_get_posts',
+    //     'query': query
+    //   };
+    //   $.post(ajax.url, data, function(r) {
+    // 		self.$results.append(r);
+    //     console.log(r);
+    // 	});
+    // });
   }
 
 }

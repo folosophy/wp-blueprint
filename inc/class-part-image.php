@@ -11,11 +11,19 @@ class Image extends Part {
   protected $crop;
   protected $img;
   protected $imgId;
+  protected $post;
   protected $src;
   protected $srcLowRes;
 
   function init() {
     $this->setCrop(false);
+  }
+
+  static function getUrl($size,$img_id) {
+    // TODO: sizes array and theme filter
+    $url = wp_get_attachment_image_src($img_id,$size);
+    $url = $url[0];
+    return $url;
   }
 
   function getImg() {
@@ -41,30 +49,84 @@ class Image extends Part {
     else {return $sizes;}
   }
 
+  // protected function getSrcset($img_id) {
+  //   // TODO: check for valid size
+  //   $set   = '';
+  //   $sizes = array(
+  //     'medium' => '1000',
+  //     'large',
+  //     'hero'
+  //   );
+  //
+  // }
+
+  function isBg($is_bg) {
+    if ($is_bg) {$this->addClass('img-bg');}
+    return $this;
+  }
+
+  protected function makeSrcset($img_id,$sizes=null) {
+    // TODO: more accurate sizing
+    $set = '';
+    $sizes = array(
+      'medium' => '80w',
+      'large'  => '1200w'
+    );
+    foreach ($sizes as $size => $width) {
+      $url = wp_get_attachment_image_src($img_id,$size);
+      $url = $url[0];
+      if ($url) {$set .= "$url $width,";}
+    }
+    return $set;
+  }
+
   function setImg() {
-    $this->img = (new Image());
+    $this->img = (new Image())
+      ->setPost($this->post);
     if ($this->crop) {$this->img->setClass('img-bg');}
     return $this->img;
   }
 
   function setSrc($src=null) {
-    if (is_int($src)) {
-      $full = wp_get_attachment_image_url($src,'full');
-    } elseif (is_string($src)) {
-      $full = $src;
-    }else {
-      if (!$this->imgId) {
-        $this->imgId = get_post_thumbnail_id();
-      }
-      if ($this->imgId) {
-        $full = wp_get_attachment_image_url($this->imgId,'full');
-      } else {
-        $full = plugins_url() . '/wp-blueprint/' . 'assets/img/placeholder.jpg';
-      }
+
+    if (!$src) {
+      $img_id = get_field('featured_media_image',$this->post_id) ?: get_post_thumbnail_id($this->post_id);
+      if ($img_id) {$src = (int) $img_id;}
     }
-    $this->img->setAttr('src-full',$full);
-    $this->img->setAttr('src',wp_get_attachment_image_url($this->imgId,'lowres'));
-    return $this->img;
+
+    if (is_int($src)) {
+      
+      $srcset = $this->makeSrcset($src);
+      $this->setAttr('data-srcset',$srcset);
+      $this->setAttr('src',self::getUrl('lowres',$src));
+      $alt =  get_post_meta($src,'_wp_attachment_image_alt',true);
+      $this->getImg()->setAlt($alt);
+    } elseif (is_string($src)) {
+      $srcset = false;
+      $this->setAttr('src',$src);
+    }
+
+    return $this;
+
+    // if (is_int($src)) {
+    //   $full = wp_get_attachment_image_url($src,'full');
+    // } elseif (is_string($src)) {
+    //   $full = $src;
+    // } else {
+    //   // Default featured image
+    //   if (!$this->imgId) {
+    //     $this->imgId = get_post_thumbnail_id($this->post_id);
+    //   }
+    //   if ($this->imgId) {
+    //     $full = wp_get_attachment_image_url($this->imgId,'full');
+    //   } else {
+    //     $full = plugins_url() . '/wp-blueprint/' . 'assets/img/placeholder.jpg';
+    //   }
+    // }
+    // $this->img->setAttr('src-full',$full);
+    // $this->img->setAttr('src',wp_get_attachment_image_url($this->imgId,'lowres'));
+    // return $this->img;
+
   }
 
   function setCrop($crop=false) {
@@ -87,10 +149,12 @@ class Image extends Part {
   }
 
   function buildInit() {
+
     if ($this->crop == true) {
       $this->insertPartAfter($this->img);
     } else {
-      if (!isset($this->atts['src-full'])) {$this->setSrc();}
+      if (!isset($this->atts['src']) && !isset($this->getAtts['srcset'])) {$this->setSrc();}
+      if (empty($this->atts['class'])) {$this->addClass('img');}
       $this->addClass('ps-unloaded ps-lazy');
     }
     // if ($this->crop == true) {

@@ -7,5 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Sherpa Design Co.",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-wp-plugin": "file:node_modules/gulp-wp-plugin"
+  }
 }

@@ -15,10 +15,7 @@ class Index {
     wp_reset_query();
     global $post;
     $template = null;
-    if (is_front_page()) {
-      $template = bp_get_part('page','home');
-    }
-    elseif (is_page()) {
+    if (is_page()) {
       $template = apply_filters('bp_page_template',$template);
       if (!$template) {
         $template = bp_get_part('page',$post->post_name);
@@ -27,7 +24,11 @@ class Index {
     elseif (is_single()) {
       $template = bp_get_part('single',get_post_type());
     }
-
+    elseif (is_404()) {
+      $template = bp_get_part('404');
+    } elseif (is_search()) {
+      $template = bp_get_part('search');
+    }
 
     if ($template) {echo $template;}
     else {wp_die('No tempalte');}

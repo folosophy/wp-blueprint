@@ -1,40 +1,45 @@
 <?php
 
-namespace Blueprint\Template;
-use \Blueprint\Part as part;
+namespace Blueprint\Part\Template;
+use \Blueprint as bp;
+use \Blueprint\Part as Part;
+use \Blueprint\Part\Template as Template;
 
 class Page extends Template {
 
   protected $hero;
   protected $intro;
 
-  function init() {
+  protected function init() {
     parent::init();
   }
 
-  function setHero($name=null,$chain=false) {
-    wp_reset_query();
-    $hero = (new part\Hero($name,$this));
-    $this->hero = $hero;
-    if ($chain) {return $hero;}
-    else {return $this;}
-  }
-
-  function setIntro($name='',$chain=false) {
+  function setIntro($name='intro',$chain=false) {
     $intro = (new part\Section('intro'))
-      ->setClass('center')
+      ->setClass('center');
+
+    $wrap = $intro
       ->addWrap('blog')
         ->addClass('center intro')
         ->addHeadline()
-        ->addCopy()
-        ->end();
-    return $this->addPart($intro,$chain);
+        ->addCopy();
+
+    $button = get_field('intro_button');
+
+    if ($button) {
+      $wrap->addButton()
+        ->setType('primary')
+        ->setField($button);
+    }
+
+    $this->intro = $intro;
+    if ($chain) {return $this->intro;}
+    else {return $this;}
   }
 
-  function buildInit() {
-    parent::buildInit();
-    if (!$this->hero) {$this->setHero('secondary');}
-    $this->prependPart($this->hero);
+  function buildBody() {
+    parent::buildBody();
+    $this->body->insertPartAfter($this->intro,'hero');
   }
 
 }

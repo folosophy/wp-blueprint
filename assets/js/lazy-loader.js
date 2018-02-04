@@ -11,7 +11,8 @@ function psInit() {
 class Presto {
 
   constructor() {
-    this.isLoading = false;
+    this.isLoading  = false;
+    this.needsCheck = true;
     $('p:not(.lazy-loaded)').addClass('lazy-unloaded');
     this.checkImages();
     this.checkSections();
@@ -28,10 +29,15 @@ class Presto {
 
   loadImages() {
     // Check if loading
-    if (this.isLoading == true) {return false;}
-    this.isLoading = true;
+    if (this.isLoading == true) {
+      this.needsCheck = true;
+      return false;
+    }
+    this.isLoading  = true;
+    this.needsCheck = false;
     // Vars
-    var presto    = this,
+    var self      = this,
+        presto    = this,
         $unloaded = $('.ps-lazy.ps-unloaded'),
         range     = 1000,
         sT        = $(window).scrollTop() - range,
@@ -43,19 +49,23 @@ class Presto {
           elT = $that.offset().top,
           elB = $that.offset().top + elH;
       // Check if visible
-      if ((elT >= sT && elT <= sB) || (elB >= sT && elB <= sB)) {
-        var src = $that.attr('src-full');
-        if (src) {
-          $that.removeClass('ps-unloaded').attr('src',src);
+      if (self.inViewport($that,1000)) {
+        var srcset = $that.attr('data-srcset');
+        if (srcset) {
+          $that.removeClass('ps-unloaded');
           $that.addClass('ps-loaded');
-          $that.attr('src',$that.attr('src-full'));
+          $that.attr('srcset',$that.attr('data-srcset'));
         }
       }
       // Set loading timeout
       if (i == $unloaded.length - 1) {
         setTimeout(function() {
-          presto.isLoading = false;
-        },500);
+          self.isLoading = false;
+          if (self.needsCheck) {
+            console.log('end load, needs loading');
+            self.loadImages();
+          }
+        },20);
       }
     });
   }
@@ -72,7 +82,7 @@ class Presto {
           $item.removeClass('lazy-unloaded');
           $item.addClass('lazy-loaded');
         },delay);
-        delay += 150;
+        delay += 100;
       }
     });
   }
@@ -98,7 +108,9 @@ class AjaxLoadPosts {
 
   constructor() {
     this.$loadMore = $('.load-more-posts');
-    this.watchLoadMore();
+    if (typeof archive !== 'undefined') {
+      this.watchLoadMore();
+    }
   }
 
   watchLoadMore() {
@@ -106,24 +118,34 @@ class AjaxLoadPosts {
     self.$loadMore.click(function(e) {
       var $loadMore      = $(this),
           $gridContainer = $loadMore.closest('.grid-container'),
-          $grid          = $gridContainer.find('.post-grid');
+          $grid          = $gridContainer.find('.grid-post');
       e.preventDefault();
       var data = {
         'action'     : 'bp_ajax_load_posts',
         'query_vars' : archive.query_vars
       };
       $loadMore.text('Loading...');
-      $.post(
-        ajax.url,
-        data
-      ).success(function(r) {
-        r = JSON.parse(r);
-        console.log(r);
-        archive.query_vars = r.query_vars;
-        $grid.append(r.posts);
-        if (r.next == false) {$loadMore.remove();}
-        else {$loadMore.text($loadMore.attr('data-label'));}
-        $(window).scroll();
+      $.ajax({
+        method: 'POST',
+        url: ajax.url,
+        data : data,
+        dataType: 'json',
+        success: function(r) {
+          if (r.posts) {
+            archive.query_vars = r.query_vars;
+            $grid.append(r.posts);
+            if (r.next == false) {$loadMore.remove();}
+            else {$loadMore.text($loadMore.attr('data-label'));}
+            setTimeout(function() {
+              $(window).scroll();
+            },100);
+          } else {
+            self.$loadMore.text('No posts found.');
+            setTimeout(function() {
+              self.$loadMore.remove();
+            },1500);
+          }
+        }
       });
     });
   }

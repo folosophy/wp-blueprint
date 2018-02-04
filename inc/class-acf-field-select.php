@@ -10,6 +10,16 @@ class Select extends Choice {
     $this->setRequired(false);
   }
 
+  function setAjax($ajax) {
+    if ($ajax) {$this->field['ajax'] = 1;}
+    return $this;
+  }
+
+  function setUi($ui) {
+    if ($ui) {$this->field['ui'] = 1;}
+    return $this;
+  }
+
   function endSelect() {
     return $this->end();
   }

@@ -35,14 +35,16 @@ function bp_add_field_icon($field) {
   $field['choices'] = array('none'=>'None');
   $files = glob(get_template_directory() . '/assets/img/icon-*.svg');
   foreach ($files as $file) {
-    $key   = basename($file,'.svg');
-    $value = str_replace('icon-','',$key);
-    $value = str_replace('-',' ',$value);
-    $value = ucwords($value);
+    $ext  = pathinfo($file, PATHINFO_EXTENSION);
+    $key   = basename($file,".$ext");
+    $key = str_replace('icon-','',$key);
+    list($key) = explode('-',$key);
+    $value = ucwords($key);
     $field['choices'][$key] = $value;
   }
+  $field['choices'] = array_unique($field['choices']);
   return $field;
-} add_filter('acf/load_field/key=field_59847a1f77943','bp_add_field_icon');
+} add_filter('acf/load_field/name=icon','bp_add_field_icon');
 
 bp_glob_require('inc/core*');
 
@@ -66,10 +68,12 @@ function bp_acf_admin_style() {
   echo "
     <style>
 
-      .acf-editor-wrap iframe {
-        height: 150px !important;
-        min-height: 0 !important;
-      }
+      .hide {display:none !important;}
+
+      // .acf-editor-wrap iframe {
+      //   height: 150px !important;
+      //   min-height: 0 !important;
+      // }
       //.wp-media-buttons .insert-media {display:none;}
       .-top > .nolabel > .acf-label {display:none;}
       #commentstatusdiv {display:none;}
@@ -92,22 +96,22 @@ function bp_acf_admin_style() {
   ";
 } add_action('admin_head','bp_acf_admin_style');
 
-// TODO: Require acf load files and move to own file
-function bp_acf_load_showcase_icons( $field ) {
-    $field['choices'] = array();
-    $files = bp_glob_require('assets/img/icon-',BP);
-    if ($files) {
-      foreach ($files as $file) {
-        $key  = basename($file);
-        $val  = basename($file,'.svg');
-        $val  = ucwords(str_replace('icon-','',$val));
-        $field['choices'][$key] = $val;
-      }
-    } else {
-      $field = null;
-    }
-    return $field;
-} add_filter('acf/load_field/name=icon', 'bp_acf_load_showcase_icons');
+// // TODO: Require acf load files and move to own file
+// function bp_acf_load_showcase_icons( $field ) {
+//     $field['choices'] = array();
+//     $files = bp_glob_require('assets/img/icon-',BP);
+//     if ($files) {
+//       foreach ($files as $file) {
+//         $key  = basename($file);
+//         $val  = basename($file,'.svg');
+//         $val  = ucwords(str_replace('icon-','',$val));
+//         $field['choices'][$key] = $val;
+//       }
+//     } else {
+//       $field = null;
+//     }
+//     return $field;
+// } add_filter('acf/load_field/name=icon', 'bp_acf_load_showcase_icons');
 
 // TODO: move to proper folder/file, rename function
 function my_acf_json_load_point( $paths ) {
@@ -212,12 +216,12 @@ function custom_unregister_theme_post_types() {
 // } add_action('admin_head','admin_field_inspector');
 
 
-add_action('acf/render_field',function($field) {
-  if (current_user_can('administrator')) {
-    //echo $field['key'];
-  }
-  return $field;
-});
+// add_action('acf/render_field',function($field) {
+//   if (current_user_can('administrator')) {
+//     //echo $field['key'];
+//   }
+//   return $field;
+// });
 
 
 
@@ -402,13 +406,13 @@ function bp_ajax_load_posts() {
 
     while (have_posts()) : the_post();
 
-      $posts.= (new part\Card())
-        ->build();
+      $posts.= bp_get_part('card',get_post_type());
 
     endwhile;
 
   else :
-    echo 'no posts';
+    $return['error'] = array();
+    $return['error']['type'] = 'no_posts';
   endif;
 
   // Next
@@ -445,3 +449,68 @@ function remove_width_attribute( $html ) {
    $html = preg_replace( '/(width|height)="\d*"\s/', "", $html );
    return $html;
 }
+
+function bp_change_field_key($key,$new_key,$post_id=null) {
+  if (!$post_id) {$post_id = get_the_ID();}
+  $val      = get_field($key);
+  if ($val) {
+    $_val     = 'field_' . $new_key;
+    $_key     = '_' . $key;
+    $_new_key = '_' . $new_key;
+    update_post_meta($post_id,$new_key,$val);
+    update_post_meta($post_id,$_new_key,$_val);
+    // delete_post_meta($post_id,$key);
+    // delete_post_meta($post_id,$_key);
+  }
+}
+
+function bp_prefix_field_keys($prefix,$keys,$args) {
+  $posts = get_posts($args); global $post;
+  foreach ($posts as $post) : setup_postdata($post);
+    foreach($keys as $key) {
+      $new_key = $prefix . '_' . $key;
+      bp_change_field_key($key,$new_key);
+    }
+  endforeach; wp_reset_postdata();
+  wp_die('Ran');
+}
+
+// bp_prefix_field_keys(
+//   'dame',
+//   array('video','video','video_youtube_id','video_vimeo_id','video_thumbnail','video_source'),
+//   array('post_type'=>'dame')
+// );
+
+function bp_get_pto($post_type=null) {
+  if (!$post_type) {$post_type = get_post_type();}
+  return get_post_type_object($post_type);
+}
+
+function bp_get_video_thumbnail($host=null,$video_id=null,$post_id=null) {
+  if (!$video_id) {
+    $host = get_field('featured_media_video_host',$post_id);
+  }
+  switch ($host) {
+    case 'youtube' :
+      $video_id = get_field('featured_media_video_youtube_id');
+      $url = "http://img.youtube.com/vi/$video_id/sddefault.jpg";
+      break;
+    default :
+      $url = null;
+  }
+  return $url;
+}
+
+// Hide admin bar
+// TODO: way to toggle for admins/editors, etc
+
+show_admin_bar(false);
+
+// Remove page attributes meta box
+
+if (is_admin()) :
+function my_remove_meta_boxes() {
+    remove_meta_box('pageparentdiv', 'page', 'side');
+}
+add_action( 'admin_menu', 'my_remove_meta_boxes' );
+endif;

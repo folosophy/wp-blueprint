@@ -94,7 +94,9 @@ class NavMain extends Part {
 
   function setBrand() {
     $this->brand = (new Part())
-      ->setClass('nav-main__brand');
+      ->setClass('nav-main__brand')
+        ->setTag('a')
+        ->setAttr('href',get_bloginfo('url'));
     return $this;
   }
 
@@ -121,6 +123,11 @@ class NavMain extends Part {
   function setMobileMenu() {
     $this->mobileMenu = (new Part())
       ->setClass('menu-mobile');
+    // TODO: move to method
+    $this->mobileMenu->addPart()
+      ->setClass('menu-mobile__header')
+      ->addPart()
+        ->setClass('menu-mobile__exit');
   }
 
   protected function prepareBrand() {
@@ -393,6 +400,10 @@ class MenuItem extends Part {
     return $this;
   }
 
+  function setLink($link=null,$link_type=null) {
+    return $this->getLabel()->setLink($link,$link_type);
+  }
+
   function setPost($post) {
     $this->post = $post;
     return $this;
@@ -457,7 +468,7 @@ class MainMenu extends Part {
     } elseif (is_string($item)) {
       $menuItem->setLabel($item);
     }
-    $this->getItems()->insertPart($menuItem);
+    $this->getItems()->addPart($menuItem);
     if ($chain) {return $menuItem;}
     else {return $this;}
   }

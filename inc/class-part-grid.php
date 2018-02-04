@@ -13,6 +13,7 @@ class Grid extends Part {
 
   protected function init() {
     $this->setClass('grid-container');
+    $this->setType($this->name);
   }
 
   function getGrid() {
@@ -37,8 +38,14 @@ class Grid extends Part {
       ->setClass('grid');
   }
 
+  function setType($type=null) {
+    if (!$type) {$type = 'post';}
+    $this->type = $type;
+  }
+
   function prepareGrid() {
-    $this->getGrid()->insertPart($this->items);
+    $grid = $this->getGrid()->insertPart($this->items);
+    if ($this->type) {$grid->addClass('grid-' . $this->type);}
     $this->insertPart($this->getGrid());
   }
 

@@ -7,7 +7,7 @@ class Form extends Part {
 
   function init() {
     $this->setTag('form');
-    $this->setId('form-' . $this->name);
+    $this->setAttr('id','form-' . $this->name);
   }
 
   function addEmailField($name=null,$chain=false) {
@@ -70,12 +70,12 @@ class Form extends Part {
   }
 
   function addTextField($name,$chain=false) {
-    $title = ucwords(str_replace('_',' ',$name));
-    $field = (new Field())
+    $placeholder = ucwords(str_replace('_',' ',$name));
+    $field = (new Field());
+    $el = $field->getFormElement()
       ->setTag('input')
-      ->setAttr('type','text')
       ->setAttr('name',$name)
-      ->setAttr('placeholder',$title);
+      ->setAttr('placeholder',$placeholder);
     return $this->addPart($field,$chain);
   }
 
@@ -90,6 +90,7 @@ class Form extends Part {
     if (!$name) {$name = 'name';}
     $field = (new Button($name,$this));
     $field
+      ->setType(false)
       ->setAttr('type','submit')
       ->setAttr('href',false)
       ->setTag('button')
@@ -106,6 +107,7 @@ class Field extends Part {
 
   function init() {
     $this->addClass('field');
+    $this->setLazy(true);
   }
 
   function getFormElement() {

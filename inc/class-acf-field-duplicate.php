@@ -7,6 +7,7 @@ class Duplicate extends Field {
 
   function init() {
     $this->setType('clone');
+    $this->setRequired(false);
   }
 
   function addClone($keys) {

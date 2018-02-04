@@ -28,7 +28,9 @@ class Group extends acf\Field {
   function getField() {
     $this->field['sub_fields'] = array();
     if (count($this->fields) == 1) {
-      $this->fields[0]->hideLabel();
+      if ($this->getName() == $this->fields[0]->getName()) {
+        $this->fields[0]->hideLabel();
+      }
     }
     foreach ($this->fields as $field) {
       $field = $field->getField();

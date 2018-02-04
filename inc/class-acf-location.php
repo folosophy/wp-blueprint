@@ -15,6 +15,7 @@ class Location {
   use bp\Chain;
 
   function addLocation($vals,$param='post_type',$operator='==') {
+    if (is_int($vals) && !$param) {$param = 'page';}
     if (!is_array($vals)) {$vals = array($vals);}
     foreach ($vals as $val) {
       array_push(

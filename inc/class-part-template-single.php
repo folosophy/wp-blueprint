@@ -1,11 +1,11 @@
 <?php
 
-namespace Blueprint\Template;
+namespace Blueprint\Part\Template;
 use \Blueprint\Part as part;
 
 // https://codex.wordpress.org/Function_Reference/register_post_type#Arguments
 
-class Single extends \Blueprint\Template {
+class Single extends part\Template {
 
   protected $article;
   protected $body;
@@ -30,10 +30,13 @@ class Single extends \Blueprint\Template {
   }
 
   function buildPostHeader() {
-    $header = $this->getPostHeader()
-      ->insertPartBefore($this->getCategory())
-      ->insertPartAfter($this->getTitle());
-    $this->buildPostMeta();
+    $header = $this->getPostHeader();
+    if ($header->defaultBuild !== false) {
+      $header
+        ->insertPartBefore($this->getCategory())
+        ->insertPartAfter($this->getTitle());
+      $this->buildPostMeta();
+    }
     $this->getBody()->addPart($header);
   }
 
@@ -65,9 +68,9 @@ class Single extends \Blueprint\Template {
 
   function setCategory($category=null) {
     if (!$category) {
-      $terms = get_the_terms(get_the_ID(),'event_category');
+      $terms = get_the_terms(get_the_ID(),get_post_type() . '_category');
       $cat = '';
-      if (!$terms) {$this->category = get_post_type();}
+      if (!$terms || isset($terms->errors)) {$this->category = get_post_type();}
       else {
         foreach ($terms as $i => $term) {
           if ($i < count($terms) - 1) {$this->category .= ' / ';}
@@ -91,10 +94,10 @@ class Single extends \Blueprint\Template {
     // TODO: video, etc
   }
 
-  function setHero() {
+  function setHero($name=null) {
     parent::setHero();
     $this->getHero()
-      ->getContent()
+      ->getHeroContent()
         ->setHeadline(false);
   }
 
@@ -150,8 +153,8 @@ class Single extends \Blueprint\Template {
     $this->recentPosts = (new part\Section('recent_posts'));
 
     $posts = $this->recentPosts
-      ->addPart()
-        ->setClass('post__recent-posts');
+      ->addWrap()
+        ->addClass('post__recent-posts');
 
     $recent_posts_label =
       $this->postTypeObject->labels->recent_posts ??
@@ -203,12 +206,15 @@ function setPostSidebar() {
   }
 
   function buildPostContent() {
-    if (get_the_content()) {
-      $content = apply_filters('the_content',get_the_content());
-      $this->getPostContent()->addHtml($content);
-    } else {
-      $no_content = $this->postTypeObject->labels->no_content ?? 'More info coming soon!';
-      $this->getPostContent()->addHtml("<p class='center'>$no_content</p>");
+    $content = $this->getPostContent();
+    if ($content->defaultBuild !== false) {
+      if (get_the_content()) {
+        $content = apply_filters('the_content',get_the_content());
+        $this->getPostContent()->addHtml($content);
+      } else {
+        $no_content = $this->postTypeObject->labels->no_content ?? 'More info coming soon!';
+        $this->getPostContent()->addHtml("<p class='center'>$no_content</p>");
+      }
     }
   }
 

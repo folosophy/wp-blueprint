@@ -1,4 +1,4 @@
-<?php
+<?php/*
 
 namespace Blueprint\Acf\Group;
 use \Blueprint\Acf as acf;

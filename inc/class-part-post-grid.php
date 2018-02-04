@@ -14,7 +14,6 @@ class PostGrid extends Grid {
   protected function init() {
     parent::init();
     $this->setLoadMore(false);
-    $this->getGrid()->addClass('post-grid');
   }
 
   function getArg($arg) {
@@ -43,6 +42,7 @@ class PostGrid extends Grid {
   }
 
   function setQuery() {
+    $this->args['post_status'] = 'publish';
     $args = $this->args;
     if (!isset($this->args['post__not_in'])) {$this->setNotIn();}
     $this->args = $args;
@@ -106,6 +106,7 @@ class PostGrid extends Grid {
   function isArchive($bool=true) {
     if ($bool == true) {
       add_action('wp_enqueue_scripts',array($this,'localizeLoadMore'));
+      $this->setArg('posts_per_page',9);
       $this->setLoadMore(true);
     }
     return $this;
@@ -116,7 +117,7 @@ class PostGrid extends Grid {
     wp_localize_script('bp_lazy_loader_script','archive',array('query_vars'=>$query->query_vars));
   }
 
-  function prepareLoadMore() {
+  protected function prepareLoadMore() {
     if ($this->loadMore) {
       $this->addPart()
         ->setClass('center')
