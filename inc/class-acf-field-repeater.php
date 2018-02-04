@@ -40,6 +40,13 @@ class Repeater extends acf\Field {
   function setMax($max) {
     if (!is_int($max)) {$this->throwInputError('int');}
     $this->field['max'] = $max;
+    return $this;
+  }
+
+  function setMin($min) {
+    if (!is_int($min)) {$this->throwInputError('int');}
+    $this->field['min'] = $min;
+    return $this;
   }
 
 }

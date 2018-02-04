@@ -4,6 +4,7 @@ namespace Blueprint\Part;
 
 class Section extends Part {
 
+  protected $bg;
   protected $body;
   protected $id='';
   protected $name;
@@ -15,16 +16,19 @@ class Section extends Part {
     $this->setId();
     $this->setField();
     $this->setTag('section');
-    //diedump($this->field);
+  }
+
+  function getBg() {
+    return $this->checkSet('bg');
+  }
+
+  function setBg() {
+    $this->bg = (new Image())
+      ->setClass('section__bg');
   }
 
   function setBody($body=null) {
     $this->body = $body;
-    return $this;
-  }
-
-  function setClass($class=null) {
-    $this->class = $class;
     return $this;
   }
 
@@ -41,8 +45,9 @@ class Section extends Part {
   }
 
   function buildInit() {
-    if (!$this->theme) {$this->setTheme();}
-    $this->addClass($this->theme);
+    if (isset($this->bg)) {$this->insertPartBefore($this->getBg());}
+    //if (!$this->theme) {$this->setTheme();}
+    //$this->addClass($this->theme);
   }
 
 }

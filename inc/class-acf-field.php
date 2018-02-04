@@ -15,6 +15,8 @@ class Field {
   protected $key;
   protected $logic;
   protected $prefix;
+  protected $saveKeys;
+  protected $saveValue;
 
   function __construct($key,$parent) {
     $this->parent = $parent;
@@ -22,8 +24,40 @@ class Field {
     $this->setPrefix();
     $this->setLabel();
     $this->field['wrapper'] = array();
+    $this->setRequired(true);
     if (method_exists($this,'init')) {$this->init();}
-    if ($this->field['type'] !== 'clone') {$this->field['required'] = 1;}
+  }
+
+  function addSaveKey($key,$table='post') {
+
+    // Setup vars
+    $save = array();
+    if (!is_array($this->saveKeys)) {$this->saveKeys = array();}
+
+    // Set table type
+    $tables = array('post','option','user');
+    if (!in_array($table,$tables)) {diedump('Field addSaveKey: invalid table');}
+    $save['table'] = $table;
+
+    // Add key
+    $save['key'] = $key;
+
+    array_push($this->saveKeys,$save);
+
+    add_filter("acf/update_value/key=$this->key",array($this,'saveValue'));
+
+    return $this;
+
+  }
+
+  function applyLoadFilters() {
+    $tag = 'bp/load_field/key=' . $this->key;
+    apply_filters($tag,$this);
+  }
+
+  function disable() {
+    $this->field['disabled'] = true;
+    return $this;
   }
 
   function dumpField() {
@@ -32,6 +66,11 @@ class Field {
 
   function getKey() {
     return $this->field['key'];
+  }
+
+  function getLogic() {
+    if (!isset($this->logic)) {$this->setLogic();}
+    return $this->logic;
   }
 
   function getName() {
@@ -48,6 +87,11 @@ class Field {
 
   function getType() {
     return $this->field['type'];
+  }
+
+  function hideLabel() {
+    $this->addClass('nolabel');
+    return $this;
   }
 
   function setLogic($key=null,$value=null,$operator='==') {
@@ -72,6 +116,20 @@ class Field {
 
   function getPrefix() {
     return $this->prefix;
+  }
+
+  function saveValue($val) {
+    if (is_array($this->saveKeys)) {
+      foreach ($this->saveKeys as $save) {
+        switch($save['table']) {
+          case 'post' :
+            $update = add_post_meta(get_the_ID(),$key,$val);
+            break;
+        }
+        //$update = add_post_meta(get_the_ID(),$key,$val);
+      }
+    }
+    return $val;
   }
 
   function setClass($class) {
@@ -130,7 +188,7 @@ class Field {
 
   function setRequired($required=1) {
     if ($required) {$this->field['required'] = $required;}
-    elseif ($required == null) {unset($this->field['required']);}
+    else {$this->field['required'] = 0;}
     return $this;
   }
 

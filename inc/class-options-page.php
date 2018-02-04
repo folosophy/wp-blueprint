@@ -7,13 +7,12 @@ class OptionsPage {
   protected $name;
   protected $options = array();
   protected $parent;
-  protected $title;
+  protected $label;
 
   function __construct($slug) {
     $this->options['menu_slug'] = str_replace('_','-',$slug);
-    $this->setTitle($slug);
+    $this->setLabel($slug);
     $this->setPageTitle();
-    $this->setMenuTitle();
     $this->setCapability();
     add_action('init',array($this,'add'));
   }
@@ -24,10 +23,11 @@ class OptionsPage {
     return $this;
   }
 
-  function setTitle($title=null) {
-    $title = str_replace('_',' ',$title);
-    $title = ucwords($title);
-    $this->title = $title;
+  function setLabel($label=null) {
+    $label = str_replace('_',' ',$label);
+    $label = ucwords($label);
+    $this->label = $label;
+    $this->options['menu_title'] = $label;
     return $this;
   }
 
@@ -44,14 +44,8 @@ class OptionsPage {
   }
 
   private function setPageTitle($title = null) {
-    if (!$title) {$title = $this->title;}
+    if (!$title) {$title = $this->label;}
     $this->options['page_title'] = $title;
-    return $this;
-  }
-
-  private function setMenuTitle($title = null) {
-    if (!$title) {$title = $this->title;}
-    $this->options['menu_title'] = $title;
     return $this;
   }
 

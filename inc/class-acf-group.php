@@ -18,9 +18,11 @@ class Group {
   public $groupTitle;
   protected $prefix;
   protected $isGroup = true;
+  protected $frunk;
 
   function __construct($name,$parent=null) {
     $this->setName($name);
+    if ($this->name == 'dame_info') {$this->frunk = true;}
     $this->setTitle();
     $this->group['active'] = 1;
     $this
@@ -31,9 +33,14 @@ class Group {
     add_action('init',array($this,'register'));
   }
 
-  function addRepeater($name) {
-    $field = (new Field\Repeater($name,$this));
+  function addFlexibleContent($name) {
+    $field = (new Field\FlexibleContent($name,$this));
     return $this->addField($field,true);
+  }
+
+  function getLocation() {
+    if (!isset($this->location)) {$this->setLocation();}
+    return $this->location;
   }
 
   function setLabelPlacement($placement) {
@@ -45,7 +52,7 @@ class Group {
     return $this;
   }
 
-  function setLocation($val,$param='post_type',$operator='==',$chain=false) {
+  function setLocation($val=null,$param='post_type',$operator='==',$chain=false) {
     // Check if specific to certain page or post
     $vals  = array('front_page');
     $params = array('page','post','page_type','options_page');
@@ -57,8 +64,8 @@ class Group {
     if (is_string($val)) {
       $val = array($val);
     }
-    $location = (new Location($this))
-      ->addLocation($val,$param,$operator);
+    $location = (new Location($this));
+    if ($val) {$location->addLocation($val,$param,$operator);}
     $this->location = $location;
     if ($chain) {return $location;}
     else {return $this;}
@@ -104,6 +111,13 @@ class Group {
     return $this;
   }
 
+  function setStyle($style='default') {
+    $options = array('default','seamless');
+    if (!in_array($style,$options)) {$style = 'default';}
+    $this->group['style'] = $style;
+    return $this;
+  }
+
   function getFields() {
     return $this->fields;
   }
@@ -122,10 +136,14 @@ class Group {
     return $this;
   }
 
+  function dumpGroup() {
+    diedump($this->group);
+  }
+
   function register() {
     // Hide labels for single-field groups
     if (count($this->fields) == 1) {
-      $this->fields[0]->addClass('nolabel');
+      $this->fields[0]->addClass('nolabel group_only_one_field');
     }
     if (method_exists($this,'preRegister')) {
       $this->preRegister();
@@ -135,6 +153,8 @@ class Group {
     }
     $this->group['fields'] = array();
     foreach ($this->fields as $field) {
+      global $post;
+      $field->applyLoadFilters();
       if (is_object($field)) {$field = $field->getField();}
       array_push($this->group['fields'],$field);
     }

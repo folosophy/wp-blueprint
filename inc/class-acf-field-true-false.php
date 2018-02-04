@@ -9,10 +9,7 @@ class TrueFalse extends acf\Field {
     $this->setType('true_false');
     $this->setUI();
     $this->setDefaultValue(0);
-  }
-
-  function endTrueFalse() {
-    return $this->end();
+    $this->setRequired(0);
   }
 
   function setMessage($message) {

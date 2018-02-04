@@ -12,14 +12,6 @@ class Head extends Part  {
   function init() {
     wp_reset_query();
     $this->setTag('head');
-    $this->setTemplateType();
-  }
-
-  function setTemplateType() {
-    global $post;
-    if (is_single())   {$class = 'single_' . get_post_type();}
-    elseif (is_page()) {$class = 'page-' . $post->post_name;}
-    $this->addClass($class);
   }
 
   // function setBodyType() {

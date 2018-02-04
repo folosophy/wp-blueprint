@@ -16,6 +16,8 @@ class PostType {
   protected $rewrite = array();
   protected $tags;
 
+  // postType: singular
+
   function __construct($postType,$plural=null) {
     $this->postType = $postType;
     $this->setLabel($postType);
@@ -25,10 +27,56 @@ class PostType {
     add_action('init',array($this,'register'));
   }
 
+  function setArg($key,$val) {
+    $this->args[$key] = $val;
+  }
+
+  function setMedia($formats=null) {
+    if (is_array($formats)) {diedump('PostType setMedia does not accept array.');}
+    $formats = func_get_args();
+    // TODO: filter invalid formats
+    $options = array('image','video');
+    if ($formats == null) {$formats = array('image');}
+    $this->mediaFormats = $formats;
+    add_action('bp_group_featured_media',array($this,'addMediaLocation'));
+    add_action('acf/load_field/key=field_featured_media_format',array($this,'loadMediaFormats'));
+    return $this;
+  }
+
+  function addMediaLocation($field) {
+    $field->getLocation()->addLocation($this->postType);
+    return $field;
+  }
+
   function addGroup($name) {
     $group = (new acf\Group($name,$this))
       ->setLocation($this->postType);
     return $group;
+  }
+
+  function addSettingsPage() {
+    if ( function_exists( 'acf_add_options_sub_page' ) ){
+    	acf_add_options_sub_page(array(
+    		'title'      => 'Settings',
+    		'parent'     => 'edit.php?post_type=' . $this->postType,
+    		'capability' => 'edit_posts',
+        'slug'       => $this->postType . '_settings'
+    	));
+    }
+    return $this;
+  }
+
+  function loadMediaFormats($field) {
+    if (get_post_type() == $this->postType) {
+      $choices = array();
+      $formats = (array) $this->mediaFormats;
+      foreach ($formats as $i => $key) {
+        $choices[$key] = ucwords($key);
+      }
+      $field['choices'] = $choices;
+      if (count($choices) == 1) {$field['wrapper']['class'] .= ' hide';}
+    }
+    return $field;
   }
 
   function setAllItems($label) {
@@ -72,31 +120,31 @@ class PostType {
     return $this;
   }
 
-  function setMedia($formats) {
-    if (is_string($formats)) {$formats = array($formats);}
-    foreach ($formats as $key => $val) {
-      if(is_int($key)) {$key = $val;}
-      $val = ucwords($val);
-      $this->mediaFormats[$key] = $val;
-    }
-    add_action('current_screen',function() {
-      // Populate media format choices
-      $post_type = get_current_screen();
-      $post_type = $post_type->id;
-      if ($post_type == $this->postType) {
-        add_filter('acf/load_field/name=featured_media',function($field) {
-          $field['sub_fields'][0]['choices'] = $this->mediaFormats;
-          return $field;
-        });
-      }
-    });
-    // Add post type location
-    add_filter('bp_featured_media_location',function($location) {
-      array_push($location,$this->postType);
-      return $location;
-    });
-    return $this;
-  }
+  // function setMedia($formats) {
+  //   if (is_string($formats)) {$formats = array($formats);}
+  //   foreach ($formats as $key => $val) {
+  //     if(is_int($key)) {$key = $val;}
+  //     $val = ucwords($val);
+  //     $this->mediaFormats[$key] = $val;
+  //   }
+  //   add_action('current_screen',function() {
+  //     // Populate media format choices
+  //     $post_type = get_current_screen();
+  //     $post_type = $post_type->id;
+  //     if ($post_type == $this->postType) {
+  //       add_filter('acf/load_field/name=featured_media',function($field) {
+  //         $field['sub_fields'][0]['choices'] = $this->mediaFormats;
+  //         return $field;
+  //       });
+  //     }
+  //   });
+  //   // Add post type location
+  //   add_filter('bp_featured_media_location',function($location) {
+  //     array_push($location,$this->postType);
+  //     return $location;
+  //   });
+  //   return $this;
+  // }
 
   function setMenuPosition($pos=20) {
     $this->args['menu_position'] = $pos;
@@ -138,7 +186,13 @@ class PostType {
   }
 
   function setPublic($public=true) {
-    if ($public) {$this->args['public'] = true;}
+    $this->args['public'] = (bool) $public;
+    return $this;
+  }
+
+  function setQueryable($bool) {
+    $this->args['publicly_queryable'] = (bool) $bool;
+    return $this;
   }
 
   function setRecentTitle($title) {
@@ -154,7 +208,7 @@ class PostType {
   }
 
   function setSupports($features=null) {
-    if (!$features) {$features = array('title','thumbnail','editor');}
+    if (!$features) {$features = array('title');}
     elseif (is_string($features)) {$features = array($features);}
     $this->args['supports'] = $features;
     return $this;
@@ -164,6 +218,10 @@ class PostType {
     $icon = 'dashicons-' . $icon;
     $this->args['menu_icon'] = $icon;
     return $this;
+  }
+
+  function setUi($ui) {
+    $this->args['show_ui'] = (bool) $ui;
   }
 
   // function setTaxonomies($taxes) {
@@ -176,6 +234,7 @@ class PostType {
   function setSlug($slug=null) {
     if (!$slug) {$slug = $this->name;}
     $this->rewrite['slug'] = $slug;
+    $this->rewrite['with_front'] = false;
     return $this;
   }
 

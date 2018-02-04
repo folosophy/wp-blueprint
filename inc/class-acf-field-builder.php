@@ -26,7 +26,7 @@ trait FieldBuilder {
     $field = (new Field\Group($name,$this));
     $sub_fields = $field
       ->addText('label')
-      ->addSelect('link_target')
+      ->addSelect('link_type')
         ->setChoices(array(
           'external' => 'External (Another Website)',
           'internal' => 'Internal (Your Website)',
@@ -34,10 +34,13 @@ trait FieldBuilder {
         ))
         ->endSelect()
       ->addUrl('external_link',true)
-        ->setLogic('link_target','external')
+        ->setLogic('link_type','external')
         ->end()
       ->addPostObject('internal_link',true)
-        ->setLogic('link_target','internal')
+        ->setLogic('link_type','internal')
+        ->end()
+      ->addText('section_link',true)
+        ->setLogic('link_type','section')
         ->end();
     return $this->addField($field,$chain);
   }
@@ -96,6 +99,12 @@ trait FieldBuilder {
     } else {return $this;}
   }
 
+  function addIconSelect($name='icon') {
+    $field = (new Field\Select($name,$this));
+    $this->addField($field,false);
+    return $this;
+  }
+
   function addImage($name,$chain=false) {
     $field = (new Field\Image($name,$this));
     return $this->addField($field,$chain);
@@ -130,7 +139,7 @@ trait FieldBuilder {
     return $this->addField($field,$chain);
   }
 
-  function addPostObject($name,$chain=false) {
+  function addPostObject($name,$chain=true) {
     $field = (new Field\PostObject($name,$this));
     return $this->addField($field,$chain);
   }
@@ -144,6 +153,11 @@ trait FieldBuilder {
     $field = (new Field\Number($name,$this))
       ->setType('range');
     return $this->addField($field,$chain);
+  }
+
+  function addRepeater($name) {
+    $field = (new Field\Repeater($name,$this));
+    return $this->addField($field,true);
   }
 
   function addTab($name,$chain=false) {
@@ -181,7 +195,8 @@ trait FieldBuilder {
   }
 
   function addVideo($name='video',$chain=false) {
-    $field = $this->addClone('video','field_video',$chain);
+    $field = (new Field\Video($name,$this));
+    return $this->addField($field,$chain);
     return $field;
   }
 

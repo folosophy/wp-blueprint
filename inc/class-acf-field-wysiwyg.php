@@ -7,7 +7,7 @@ class Wysiwyg extends acf\Field  {
 
   function init() {
     $this->setType('wysiwyg');
-    $this->setMediaUpload();
+    $this->setMedia(false);
     $this->setTabs();
     $this->setToolbar();
   }
@@ -28,7 +28,7 @@ class Wysiwyg extends acf\Field  {
     return $this;
   }
 
-  function setMediaUpload($upload=false) {
+  function setMedia($upload=false) {
     if ($upload) {$this->field['media_upload'] = 1;}
     else {$this->field['media_upload'] = 0;}
     return $this;

@@ -33,7 +33,7 @@ class Enqueue {
     add_action($action,array($this,'enqueue'));
   }
 
-  function setAction() {
+  function setAction($action=null) {
     if (!$action) {$action = 'wp_enqueue_scripts';}
     add_action($action,array($this,'enqueue'));
   }
