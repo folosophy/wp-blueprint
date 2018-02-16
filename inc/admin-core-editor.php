@@ -10,10 +10,4 @@ if (bp_is_local()) {
   //   echo "<button id='bp-add-media' class='button'>BP Add Media</button>";
   // });
 
-  $editor = (new Blueprint\Acf\Group('editor'))
-    ->setLocation('work');
-
-    $editor->addWysiwyg('editor',true)
-      ->setMedia(true);
-
 }

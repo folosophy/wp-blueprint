@@ -1,10 +1,10 @@
-jQuery(document).ready(function($) {
+'use strict';
 
-$('body').on('click','.wp-editor-wrap img',function(e) {
+jQuery(document).ready(function ($) {
 
-  e.preventDefault();
-  alert('test');
+  $('body').on('click', '.wp-editor-wrap img', function (e) {
 
-});
-
+    e.preventDefault();
+    alert('test');
+  });
 }); // End jQuery

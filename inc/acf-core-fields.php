@@ -6,8 +6,8 @@ namespace Blueprint\Acf;
 
 $hero = (new Group('hero'))
   ->setOrder('top')
-  ->setPosition('high')
-  ->setLocation('page');
+  ->setPosition('high');
+  //->setLocation('page');
 
 $hero_group = $hero->addGroup('hero')
   ->setLayout('row');
@@ -181,13 +181,16 @@ $text_elements = (new Group('text_elements'))
   ->addText('headline')
   ->setLocation('post');
 
-$g_user = (new Group('user'))
+$group_user = $gusr = (new Group('user'))
   ->setTitle('Basic Info')
+  ->setPosition('high')
   ->setLocation('all','user_form');
 
-  $user = $g_user->addGroup('user');
+  $user = $gusr->addGroup('user');
 
-    $user->addImage('profile_photo',true);
+    $user->addImage('profile_photo',true)
+      ->setRequired(false);
+
     //
     // $user->addText('first_name',true);
     //
@@ -228,13 +231,18 @@ $intro = (new Group('intro'))
       ->setLogic('button_enabled',true)
       ->end()
     ->end()
-  ->setLocation('page')
+  //->setLocation('page')
   ->setPosition('high')
   ->setOrder('high');
 
 $intro = apply_filters('bp_group_intro',$intro);
 
-//diedump($intro->getLocation());
+$editor = (new Group('editor'))
+  ->setLocation('page','template')
+  ->setStyle('seamless');
+
+  $editor->addWysiwyg('editor',true)
+    ->setMedia(true);
 
 // Events
 // TODO: MTF Activate with events class, etc
@@ -319,6 +327,63 @@ $g_meta = (new Group('meta'))
 
   // TODO save key
   $g_meta->addTextArea('excerpt');
+
+// Template
+
+$template = (new Group('template'))
+  ->setLocation('page')
+  ->setLabelPlacement('top')
+  ->setPosition('side');
+
+  $template->addSelect('template')
+    ->hideLabel()
+    ->setChoices(array(
+      'default',
+      'basic'
+    ));
+
+  $template->addTrueFalse('template_is_locked',true)
+    ->setLabel('Locked');
+
+add_action('acf/prepare_field/key=field_template_is_locked',function($field) {
+  if (current_user_can('administrator')) {return $field;}
+  else {return false;}
+});
+
+add_action('acf/load_field/key=field_template',function($field) {
+
+  // Check if template is locked
+  $locked = get_post_meta(get_the_ID(),'template_is_locked',true);
+  $admin = current_user_can('administrator');
+
+  // Lock template if locked and user is not admin
+  if ($locked && !$admin) {
+    $val = get_post_meta(get_the_ID(),'template',true);
+    $field['choices'] = array($val => ucwords($val));
+    $field['wrapper']['class'] .= ' nolabel ';
+  }
+
+  if (!$locked || $admin) {
+
+    $field['choices'] = array();
+
+    $base = get_template_directory() . '/parts/';
+    $files = glob($base . get_post_type() . '*.php');
+
+    foreach ($files as $file) {
+      $key = str_replace($base,'',$file);
+      $key = str_replace('.php','',$key);
+      $val = str_replace('page-','',$key);
+      $val = str_replace('_',' ',$val);
+      $val = ucwords(str_replace('-',' ',$val));
+      $field['choices'][$key] = $val;
+    }
+
+  }
+
+  return $field;
+
+});
 
 ////////////////////////////////////////////////////////
 // OPTIONS

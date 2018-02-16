@@ -33,12 +33,11 @@ class Autoloader {
       $path  = explode('\\',$class,-1);
       $path  = implode('\\',$path) . '-';
       $path  = strtolower(str_replace('\\','-',$path));
-      $path  = 'class/' . $path;
     } else {
-      $path = 'class/';
+      $path = null;
     }
 
-    $path = 'inc/' . $path;
+    $path = 'classes/' . $path;
 
     // Write name
     $name  = explode('\\',$class);

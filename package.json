@@ -9,7 +9,11 @@
   "author": "Sherpa Design Co.",
   "license": "ISC",
   "devDependencies": {
+    "babel": "^6.23.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
     "gulp": "github:gulpjs/gulp#4.0",
+    "gulp-babel": "^7.0.1",
     "gulp-wp-plugin": "file:node_modules/gulp-wp-plugin"
   }
 }

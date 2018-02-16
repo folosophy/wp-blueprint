@@ -87,10 +87,19 @@ function bp_acf_admin_style() {
       .acf-field-group.nolabel > .acf-input {padding: 0 !important;}
       .acf-field-group.nolabel > .acf-input > .acf-fields { border:none !important;}
 
-      .acf-field.nolabel > .acf-label {display:none !important;}
-      .acf-field.nolabel::before {display:none !important;}
-      .acf-field.nolabel {padding-left: 0 !important;}
-      .acf-field.nolabel > .acf-input {width:100% !important;}
+      .acf-field.-left.nolabel > .acf-label {display:none !important;}
+      .acf-field.-left.nolabel::before {display:none !important;}
+      .acf-field.-left.nolabel {padding-left: 0 !important;}
+      .acf-field.-left.nolabel > .acf-input {width:100% !important;}
+
+      .user-admin-color-wrap,
+      .user-rich-editing-wrap,
+      .user-comment-shortcuts-wrap,
+      .show-admin-bar.user-admin-bar-front-wrap,
+      .user-url-wrap,
+      .user-description-wrap {
+        display: none !important;
+      }
 
     </style>
   ";
@@ -319,12 +328,7 @@ function bp_get_posts() {
 
 function bp_get_part($base,$name=null,$plugin=null) {
   ob_start();
-  $part = get_template_part('parts/' . $base,$name);
-  // if (!$part {
-  //   $file = $base;
-  //   if ($name) {$file = $file . '-' . $name;}
-  //   diedump($file);
-  // }
+  get_template_part('parts/' . $base,$name);
   return ob_get_clean();
 }
 
@@ -508,9 +512,37 @@ show_admin_bar(false);
 
 // Remove page attributes meta box
 
-if (is_admin()) :
-function my_remove_meta_boxes() {
-    remove_meta_box('pageparentdiv', 'page', 'side');
+// Page Template Location Rule
+
+add_filter('acf/location/rule_types', 'acf_location_rules_types');
+
+function acf_location_rules_types( $choices ) {
+
+    $choices['template'] = 'Template';
+
+    return $choices;
+
 }
-add_action( 'admin_menu', 'my_remove_meta_boxes' );
-endif;
+
+add_filter('acf/location/rule_match/template', 'acf_location_rules_match_user', 10, 3);
+function acf_location_rules_match_user( $match, $rule, $options ) {
+
+  if (get_field('template') == $rule['value']) {$match = true;}
+
+  return $match;
+
+}
+
+if (is_admin()) {
+
+  $acf_script = (new enqueue\Script('bp_acf_script','acf.js',BP))
+    ->addAjax()
+    ->setAction('admin_enqueue_scripts');
+
+  function bp_update_field() {
+    $data = $_POST;
+    $update = update_field($data['field'],$data['value'],$data['id']);
+    wp_die();
+  } add_action( 'wp_ajax_bp_update_field', 'bp_update_field' );
+
+}
