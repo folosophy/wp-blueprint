@@ -2,6 +2,11 @@
 
 namespace Blueprint\Acf;
 
+add_action('init',function() {
+  do_action('bp/acf/filter_fields');
+  do_action('bp/acf/register_fields');
+});
+
 // Hero
 
 $hero = (new Group('hero'))
@@ -22,7 +27,7 @@ $hero_group
 
 $hero_group
   ->addText('headline',true)
-    ->setLogic()
+    ->getLogic()
       ->addCondition('content_type','default','!=')
       ->endLogic()
     ->end();
@@ -35,11 +40,10 @@ $hero_group
 $hero_group
   ->addText('button_text',true)
     ->setLabel('Button Text')
-    ->setPlaceholder('Defaults to "Learn More"')
-    ->setLogic()
-      ->addCondition('content_type','post_select')
-      ->endLogic()
-    ->end();
+    ->setPlaceholder('Defaults to "Learn More"');
+
+  $hero_group->getLogic()
+    ->addCondition('content_type','post_select');
 
 $hero_group
   ->addButton('button',true)
@@ -155,12 +159,12 @@ $featured_media = (new Group('featured_media'))
 
 
 $site_info = (new Group('site_info'))
-  ->setLocation('site-options','options_page')
+  ->setLocation('options_page','site-options')
   ->addGroup('site')
     ->addEmail('email');
 
 $main_social = (new Group('main_social'))
-  ->setLocation('site-options','options_page')
+  ->setLocation('options_page','site-options')
   ->addRepeater('main_social')
     ->setButtonLabel('Add an account')
     ->setLabel('Accounts')
@@ -184,7 +188,7 @@ $text_elements = (new Group('text_elements'))
 $group_user = $gusr = (new Group('user'))
   ->setTitle('Basic Info')
   ->setPosition('high')
-  ->setLocation('all','user_form');
+  ->setLocation('user_form','all');
 
   $user = $gusr->addGroup('user');
 
@@ -235,10 +239,8 @@ $intro = (new Group('intro'))
   ->setPosition('high')
   ->setOrder('high');
 
-$intro = apply_filters('bp_group_intro',$intro);
-
 $editor = (new Group('editor'))
-  ->setLocation('page','template')
+  ->setLocation('template','page')
   ->setStyle('seamless');
 
   $editor->addWysiwyg('editor',true)
@@ -328,62 +330,7 @@ $g_meta = (new Group('meta'))
   // TODO save key
   $g_meta->addTextArea('excerpt');
 
-// Template
 
-$template = (new Group('template'))
-  ->setLocation('page')
-  ->setLabelPlacement('top')
-  ->setPosition('side');
-
-  $template->addSelect('template')
-    ->hideLabel()
-    ->setChoices(array(
-      'default',
-      'basic'
-    ));
-
-  $template->addTrueFalse('template_is_locked',true)
-    ->setLabel('Locked');
-
-add_action('acf/prepare_field/key=field_template_is_locked',function($field) {
-  if (current_user_can('administrator')) {return $field;}
-  else {return false;}
-});
-
-add_action('acf/load_field/key=field_template',function($field) {
-
-  // Check if template is locked
-  $locked = get_post_meta(get_the_ID(),'template_is_locked',true);
-  $admin = current_user_can('administrator');
-
-  // Lock template if locked and user is not admin
-  if ($locked && !$admin) {
-    $val = get_post_meta(get_the_ID(),'template',true);
-    $field['choices'] = array($val => ucwords($val));
-    $field['wrapper']['class'] .= ' nolabel ';
-  }
-
-  if (!$locked || $admin) {
-
-    $field['choices'] = array();
-
-    $base = get_template_directory() . '/parts/';
-    $files = glob($base . get_post_type() . '*.php');
-
-    foreach ($files as $file) {
-      $key = str_replace($base,'',$file);
-      $key = str_replace('.php','',$key);
-      $val = str_replace('page-','',$key);
-      $val = str_replace('_',' ',$val);
-      $val = ucwords(str_replace('-',' ',$val));
-      $field['choices'][$key] = $val;
-    }
-
-  }
-
-  return $field;
-
-});
 
 ////////////////////////////////////////////////////////
 // OPTIONS

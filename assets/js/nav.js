@@ -83,7 +83,6 @@ jQuery(document).ready(function ($) {
           if (st > 800) {
 
             if (st > self.ls) {
-              console.log('scrolling down');
               self.$nav.addClass('is-hidden').removeClass('is-visible');
             } else {
               self.$nav.removeClass('is-hidden').addClass('is-visible');

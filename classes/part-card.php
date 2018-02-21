@@ -162,6 +162,7 @@ class Card extends Part {
   function buildInit() {
 
     $this->addClass('card-' . $this->getType());
+    $this->addClass('card');
 
     if ($this->buildType == 'default') {
 
@@ -182,6 +183,7 @@ class Card extends Part {
 
     \bp_log_post($this->post_id);
     //if ($this->link !== false) {$this->setAttr('href',get_the_permalink($this->post_id));}
+
   }
 
 }

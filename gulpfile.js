@@ -15,13 +15,15 @@ gulp.task('compileJS',function() {
 
   return gulp.src('src/js/*.js')
     .pipe(plugins.babel({ presets: ['env'] }))
-    .pipe(gulp.dest('assets/js'));
+    .pipe(gulp.dest('assets/js'))
+    .pipe(livereload());
 
 });
 
-gulp.task('watch',function() {
+gulp.task('watchJS',function() {
 
-  //livereload.listen();
+  livereload.listen();
+
   var files = [
     'src/js/*.js'
   ];

@@ -10,7 +10,6 @@ class Text extends Part {
   function init() {
     if ($this->name) {$this->setText($this->name);}
     $this->setTag('p');
-    $this->setLazy(true);
   }
 
   function getPlaceholder() {
@@ -63,6 +62,7 @@ class Text extends Part {
 
   function buildInit() {
     $this->addHtml($this->getText());
+    if ($this->lazy) {$this->addClass('lazy-text');}
   }
 
 }

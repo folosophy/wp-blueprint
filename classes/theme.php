@@ -20,7 +20,7 @@ class Theme {
   }
 
   protected function loadCore() {
-    bp_glob_require('inc/admin-core*');
+    bp_glob_require('inc/core*');
   }
 
   private function loadAdmin() {

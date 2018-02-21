@@ -7,6 +7,8 @@ class NavMain extends Part {
 
   protected $brand;
   protected $brandLogo;
+  protected $darkLogo;
+  protected $lightLogo;
   protected $brandName;
   protected $button;
   protected $logos;
@@ -101,7 +103,7 @@ class NavMain extends Part {
   }
 
   function setBrandName($name=null) {
-    if ($name == false) {return $this;}
+    if ($name === false) {return $this;}
     if (!$name) {$name = get_bloginfo('name');}
     $this->brandName = (new Part())
       ->setClass('nav-main__brand-name')
@@ -110,16 +112,30 @@ class NavMain extends Part {
   }
 
   function setBrandLogo($file=null,$chain=false) {
-    $light = get_template_directory_uri() . '/assets/img/logo-nav-light.svg';
-    $dark  = get_template_directory_uri() . '/assets/img/logo-nav-dark.svg';
+
+    $logo  = get_template_directory() . '/assets/img/logo.svg';
+    $light = get_template_directory() . '/assets/img/logo-light.svg';
+    $dark  = get_template_directory() . '/assets/img/logo-dark.svg';
+    $brand = $this->getBrand();
+
+    if (file_exists($dark)) {
+      $src = get_template_directory_uri() . '/assets/img/logo.svg';
+      $this->darkLogo = (new Image($src))
+        ->addClass('logo logo-dark');
+    }
+    elseif (file_exists($logo)) {
+      $src = get_template_directory_uri() . '/assets/img/logo.svg';
+      $this->darkLogo = (new Image($src))
+        ->addClass('logo logo-dark');
+    }
+    if (file_exists($light)) {
+      $src = get_template_directory_uri() . '/assets/img/logo-light.svg';
+      $this->lightLogo = (new Image($src))
+        ->addClass('logo logo-light');
+    }
+
     // TODO: check for for png, etc
-    $this->lightLogo = (new Image($light))
-      ->addClass('logo-light');
-    $this->darkLogo = (new Image($dark))
-      ->addClass('logo-dark');
-    $this->getBrand()
-      ->insertPart($this->lightLogo)
-      ->insertPart($this->darkLogo);
+
   }
 
   function setMenu() {
@@ -139,9 +155,9 @@ class NavMain extends Part {
 
   protected function prepareBrand() {
     $brand = $this->getBrand();
-    $logo  = $this->getBrandLogo();
     $name  = $this->getBrandName();
-    if ($logo) {$brand->insertPart($logo);}
+    if ($this->darkLogo) {$brand->insertPart($this->darkLogo);}
+    if ($this->lightLogo) {$brand->insertPart($this->lightLogo);}
     if ($name) {$brand->insertPart($this->getBrandName());}
     $this->insertPart($brand);
   }

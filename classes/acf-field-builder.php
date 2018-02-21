@@ -84,6 +84,11 @@ trait FieldBuilder {
 //   return $this->addField($field,$chain);
 // }
 
+  function addFlexibleContent($name,$chain=true) {
+    $field = (new field\FlexibleContent($name,$this));
+    return $this->addField($field,$chain);
+  }
+
   function addGroup($name) {
     $field = new Field\Group($name,$this);
     return $this->addField($field,true);
@@ -99,10 +104,9 @@ trait FieldBuilder {
     } else {return $this;}
   }
 
-  function addIconSelect($name='icon') {
-    $field = (new Field\Select($name,$this));
-    $this->addField($field,false);
-    return $this;
+  function addIconSelect($name='icon',$chain=false) {
+    $field = (new Field\IconSelect($name,$this));
+    return $this->addField($field,$chain);
   }
 
   function addImage($name,$chain=false) {

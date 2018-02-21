@@ -10,23 +10,21 @@ class Form extends Part {
     $this->setAttr('id','form-' . $this->name);
   }
 
-  function addEmailField($name=null,$chain=false) {
-    if (!$name) {$name = 'email';}
-    $field = (new Field());
-    $el = $field->getFormElement()
-      ->setTag('input')
-      ->setAttr('name',$name)
-      ->setAttr('placeholder','Your Email');
+  function addInputField($name=null,$chain=true) {
+    $field = (new Input($name));
+    return $this->addPart($field,$chain);
+  }
+
+  function addEmailField($name='email',$chain=false) {
+    $field = (new Input($name))
+      ->setType('email');
     return $this->addPart($field,$chain);
   }
 
   function addNameField($name=null,$chain=false) {
-    if (!$name) {$name = 'name';}
-    $field = (new Field());
+    $field = (new Input('name'));
     $el = $field->getFormElement()
-      ->setTag('input')
-      ->setAttr('name',$name)
-      ->setAttr('placeholder','Your Name');
+      ->setTag('input');
     return $this->addPart($field,$chain);
   }
 
@@ -49,29 +47,24 @@ class Form extends Part {
   }
 
   function addSelectField($name,$chain=true) {
-    if (!$name) {$name = 'name';}
     $field = (new Select($name,$this));
-    $el = $field->getFormElement()
-      ->setTag('select')
-      ->setAttr('name',$name);
     return $this->addPart($field,$chain);
   }
 
   function addTextAreaField($name=null,$chain=false) {
     $title = ucwords(str_replace('_',' ',$name));
     if (!$name) {$name = 'message';}
-    $field = (new Field());
+    $field = (new Field($name));
     $el = $field->getFormElement()
       ->setTag('textarea')
       ->setAttr('name',$name)
-      ->setAttr('placeholder','Your Message...')
       ->setAttr('rows',3);
     return $this->addPart($field,$chain);
   }
 
   function addTextField($name,$chain=false) {
     $placeholder = ucwords(str_replace('_',' ',$name));
-    $field = (new Field());
+    $field = (new Field($name));
     $el = $field->getFormElement()
       ->setTag('input')
       ->setAttr('name',$name)
@@ -88,14 +81,13 @@ class Form extends Part {
 
   function addSubmit($name=null,$chain=false) {
     if (!$name) {$name = 'name';}
-    $field = (new Button($name,$this));
-    $field
+    $field = (new Part('submit__wrap'))
+      ->addClass('submit__wrap');
+    $button = $field->addButton($name,$this);
+    $button
       ->setType(false)
       ->setAttr('type','submit')
-      ->setAttr('href',false)
-      ->setTag('button')
-      ->setLabel($name)
-      ->setClass('form__submit');
+      ->setClass('button-submit');
     return $this->addPart($field,$chain);
   }
 
@@ -106,8 +98,16 @@ class Field extends Part {
   protected $formElement;
 
   function init() {
+    if ($this->name) {
+      $this->getFormElement()->setAttr('name',$this->name);
+    }
     $this->addClass('field');
     $this->setLazy(true);
+  }
+
+  function getLabel() {
+    if (!isset($this->label)) {$this->setLabel();}
+    return $this->label;
   }
 
   function getFormElement() {
@@ -116,8 +116,22 @@ class Field extends Part {
   }
 
   function setFormElement() {
-    $this->formElement = new Part('',$this);
+    $this->formElement = (new Part('',$this))
+      ->addClass('element');
     return $this->formElement;
+  }
+
+  function setLabel($label=null) {
+
+    if (!$label) {
+      $label = ucwords(str_replace('_',' ',$this->name));
+    }
+
+    $this->label = (new Part())
+      ->setTag('label')
+      ->setAttr('for',$this->name)
+      ->addHtml($label);
+
   }
 
   function setRequired($required=true) {
@@ -127,8 +141,11 @@ class Field extends Part {
   }
 
   function prepare() {
+
+    $this->addPart($this->getLabel());
+
     $formEl = $this->getFormElement();
-    $this->addClass('field-' . $this->tag);
+    $this->addClass('field field-' . $this->getFormElement()->tag);
     if (!isset($formEl->atts['required'])) {$this->setRequired(true);}
     $this->insertPart($this->getFormElement());
   }
@@ -139,10 +156,14 @@ class Select extends Field {
 
   protected $options;
 
+  function init() {
+    parent::init();
+    $this->getFormElement()->setTag('select');
+  }
+
   function addOption($key,$val=null) {
-    if (is_int($key)) {
-      $key = $val;
-      $val = ucwords(str_replace('_',' ',$val));
+    if (!$val) {
+      $val = ucwords(str_replace('_',' ',$key));
     }
     $option = "<option value='$key'>$val</option>";
     $this->getFormElement()->addHtml($option);
@@ -169,10 +190,18 @@ class Select extends Field {
 
 }
 
-class Input extends Part {
+class Input extends Field {
 
   function init() {
+    parent::init();
+    $el = $this->getFormElement();
+    $el->addClass('is-empty');
+    $el->setTag('input');
+  }
 
+  function setType($type='text') {
+    $this->setAttr('type',$type);
+    return $this;
   }
 
 }

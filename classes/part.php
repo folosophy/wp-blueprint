@@ -37,7 +37,7 @@ class Part {
   }
 
   function addCard($post=null,$chain=false) {
-    $part = (new Card(null,$this));
+    $part = (new Card($post,$this));
     if ($post) {$part->setPost($post);}
     return $this->addPart($part,$chain);
   }
@@ -71,6 +71,11 @@ class Part {
     $class='container-' . $type;
     $part = (new Part())
       ->setClass($class);
+    return $this->addPart($part,$chain);
+  }
+
+  function addList($name=null,$chain=true) {
+    $part = (new ListElement($name));
     return $this->addPart($part,$chain);
   }
 
@@ -209,30 +214,31 @@ class Part {
   }
 
   function addCopy($text=null,$chain=false) {
-    $part = (new Copy($text,$this));
+    $part = (new Copy($text,$this))
+      ->setLazy(true);
     return $this->addPart($part,$chain);
   }
 
-  function addH($headline=null,$chain=false) {
-    $part = (new Headline($headline,$this));
+  function addH2($headline=null,$chain=false) {
+    $part = (new Headline($headline,$this))
+      ->setLazy(true);
     return $this->addPart($part,$chain);
   }
 
   function addH3($headline=null,$chain=false) {
-    $part = $this->addH($headline,true)
+    $part = (new Headline($headline,$this))
       ->setTag('h3');
-    return $this->chain($part,$chain);
+    return $this->addPart($part,$chain);
   }
 
   function addH4($headline=null,$chain=false) {
-    $part = $this->addH($headline,true)
-    ->setTag('h4');
-    return $this->chain($part,$chain);
+    $part = (new Headline($headline,$this))
+      ->setTag('h4');
+    return $this->addPart($part,$chain);
   }
 
   function addHeadline($headline=null,$chain=false) {
-    $part = (new Headline($headline,$this))
-      ->setHeadline($headline);
+    $part = (new Headline($headline,$this));
     return $this->addPart($part,$chain);
   }
 
@@ -314,9 +320,11 @@ class Part {
 
   function setLink($link=null,$target=null) {
 
+    if ($link == 52) {diedump(intval($link));}
+
     $this->setTag('a');
 
-    if (is_int($link)) {
+    if (intval($link) > 0) {
       $link = get_permalink($link);
     }
     elseif (is_string($link)) {

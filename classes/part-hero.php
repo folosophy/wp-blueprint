@@ -217,7 +217,7 @@ class HeroContent extends Part {
     $wrap = $this->addPart()
       ->setClass('hero__content__wrap');
     if ($this->getHeadline()) {
-      $h = $wrap->addH($this->getHeadline(),true)
+      $h = $wrap->addh2($this->getHeadline(),true)
         ->setTag('h1')
         ->addClass('hero__headline');
     }

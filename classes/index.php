@@ -17,7 +17,7 @@ class Index {
     if (is_page()) {
       $template = get_field('template');
       if ($template == 'default' || !$template) {$template = 'page';}
-      $template = bp_get_part('page',$post->post_name);
+      $template = bp_get_part($template);
     }
     elseif (is_single()) {
       $template = bp_get_part('single',get_post_type());

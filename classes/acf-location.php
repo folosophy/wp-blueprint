@@ -14,23 +14,28 @@ class Location {
 
   use bp\Chain;
 
-  function addLocation($vals,$param=null,$operator='==') {
-    if (is_int($vals) && !$param) {$param = 'page';}
-    if (!$param) {$param = 'post_type';}
-    if (!is_array($vals)) {$vals = array($vals);}
-    foreach ($vals as $val) {
-      array_push(
-        $this->location,
-        array(
-          array(
-            'param'    => $param,
-            'operator' => $operator,
-            'value'    => $val
-          )
-        )
-      );
+  function addLocation($param,$val=null,$operator='==') {
+
+    // If only 1 argument
+    if (!$val) {
+      $val = $param;
+      if (is_int($val)) {$param = 'page';}
+      elseif (is_string($val)) {$param = 'post_type';}
     }
+
+    array_push(
+      $this->location,
+      array(
+        array(
+          'param'    => $param,
+          'operator' => $operator,
+          'value'    => $val
+        )
+      )
+    );
+
     return $this;
+
   }
 
   function setLocations() {

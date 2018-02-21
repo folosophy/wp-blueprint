@@ -46,8 +46,7 @@ class Section extends Part {
 
   function buildInit() {
     if (isset($this->bg)) {$this->insertPartBefore($this->getBg());}
-    //if (!$this->theme) {$this->setTheme();}
-    //$this->addClass($this->theme);
+    if ($this->theme) {$this->addClass($this->theme);}
   }
 
 }

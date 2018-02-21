@@ -2,106 +2,139 @@
 
 jQuery(document).ready(function($) {
 
-// Initialize Presto
-function psInit() {
- psLoadImages();
-}
-
-// Main Class
-class Presto {
+class LazyLoader {
 
   constructor() {
+
+    // $('body').append("<div id='debug'></div>");
+    // this.$debug = $('#debug');
+    // this.$debug.css({
+    //   bottom: 0,
+    //   right: 0,
+    //   background: 'white',
+    //   minWidth: '300px',
+    //   minHeight: '300px',
+    //   position: 'fixed',
+    //   border: '2px solid black'
+    // });
+
     this.isLoading  = false;
     this.needsCheck = true;
-    $('p:not(.lazy-loaded)').addClass('lazy-unloaded');
-    this.checkImages();
-    this.checkSections();
+    this.check();
+    this.watchModules();
+
   }
 
-  checkImages() {
-    var that = this;
-    this.loadImages();
-    $(window).on('scroll',function() {
-      that.loadImages();
-      that.checkSections();
-    });
-  }
+  inView($el,range=0) {
 
-  loadImages() {
-    // Check if loading
-    if (this.isLoading == true) {
-      this.needsCheck = true;
-      return false;
-    }
-    this.isLoading  = true;
-    this.needsCheck = false;
-    // Vars
-    var self      = this,
-        presto    = this,
-        $unloaded = $('.ps-lazy.ps-unloaded'),
-        range     = 1000,
-        sT        = $(window).scrollTop() - range,
-        sB        = $(window).scrollTop() + $(window).height() + range;
-    // Loop through unloaded images
-    $unloaded.each(function(i,$el) {
-      var $that = $(this),
-          elH = $that.height(),
-          elT = $that.offset().top,
-          elB = $that.offset().top + elH;
-      // Check if visible
-      if (self.inViewport($that,1000)) {
-        var srcset = $that.attr('data-srcset');
-        if (srcset) {
-          $that.removeClass('ps-unloaded');
-          $that.addClass('ps-loaded');
-          $that.attr('srcset',$that.attr('data-srcset'));
-        }
-      }
-      // Set loading timeout
-      if (i == $unloaded.length - 1) {
-        setTimeout(function() {
-          self.isLoading = false;
-          if (self.needsCheck) {
-            self.loadImages();
-          }
-        },20);
-      }
-    });
-  }
-
-  checkSections() {
-    var self = this,
-        $items = $('.lazy-unloaded,p:not(.lazy-loaded)'),
-        delay = 0;
-    $items.each(function() {
-      var $item  = $(this),
-          inView = self.inViewport($item);
-      if (inView) {
-        setTimeout(function() {
-          $item.removeClass('lazy-unloaded');
-          $item.addClass('lazy-loaded');
-        },delay);
-        delay += 100;
-      }
-    });
-  }
-
-  inViewport($el,range=0) {
     var sT    = $(window).scrollTop() - range,
         sB    = $(window).scrollTop() + $(window).height() + range,
         elH   = $el.height(),
         elT   = $el.offset().top,
         elB   = $el.offset().top + elH;
-    if ((elT >= sT && elT <= sB) || (elB >= sT && elB <= sB)) {
-      return true
+
+    if ((elT >= sT && elT <= sB) || (elB >= sT && elB <= sB) || (elT <= sT && elB >= sB)) {
+      return true;
     } else {
       return false;
     }
+
+  }
+
+  check() {
+
+    var self = this,
+        $sections = $('section');
+
+    // if (self.isLoading) {
+    //   self.needsLoading = true;
+    //   return false;
+    // } else {self.isLoading = true;}
+
+    $sections.each(function(i,el) {
+
+      var $section = $(this);
+
+      if (self.inView($section)) {
+        self.loadItems($section);
+      } else {
+      }
+
+      // if (i == $sections.length - 1) {
+      //   self.isLoading = false;
+      //   if (self.needsCheck == true) {
+      //     self.check();
+      //   }
+      //   self.needsCheck = false;
+      // }
+
+    });
+
+  }
+
+  watchModules() {
+
+    var self = this;
+
+    $(window).scroll(function() {
+
+      self.check();
+
+    });
+
+  }
+
+  loadItems($section) {
+
+    var self = this,
+        $items = $section.find('.lazy-item.lazy-unloaded'),
+        delay  = 0;
+
+    $items.each(function() {
+
+      var $item  = $(this),
+          inView = self.inView($item);
+
+      if (self.inView($item,1000)) {
+
+        if ($item.hasClass('lazy-media') && !$item.hasClass('lazy-preloaded')) {
+          $item.attr('src',$item.attr('data-src'));
+          $item.attr('srcset',$item.attr('data-srcset'));
+          $item.addClass('lazy-preloaded');
+        }
+
+        if (self.inView($item)) {
+          setTimeout(function() {
+            $item.removeClass('lazy-unloaded');
+            $item.addClass('lazy-loaded');
+          },delay);
+          delay += 50;
+        }
+
+      }
+
+    });
+
+  }
+
+  loadImages($section) {
+
+    var $images = $section.find('img.lazy-item');
+
+    $images.each(function() {
+      var $img = $(this);
+      $img.attr('srcset',$img.attr('data-srcset'));
+    });
+
   }
 
 }
 
-var presto = new Presto();
+var ll = (new LazyLoader());
+
+
+
+// Ajax Load Posts
 
 class AjaxLoadPosts {
 

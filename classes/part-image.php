@@ -102,9 +102,17 @@ class Image extends Part {
       $this->setAttr('src',self::getUrl('lowres',$src));
       $alt =  get_post_meta($src,'_wp_attachment_image_alt',true);
       $this->getImg()->setAlt($alt);
-    } elseif (is_string($src)) {
+      $this->setLazy(true);
+
+    }
+    elseif (is_string($src)) {
+
       $srcset = false;
+      if (strpos($src,'http') !== 0) {
+        $src = get_template_directory_uri() . '/assets/img/' . $src;
+      }
       $this->setAttr('src',$src);
+
     }
 
     return $this;
@@ -156,7 +164,7 @@ class Image extends Part {
     } else {
       if (!isset($this->atts['src']) && !isset($this->getAtts['srcset'])) {$this->setSrc();}
       if (empty($this->atts['class'])) {$this->addClass('img');}
-      $this->addClass('ps-unloaded ps-lazy');
+      if ($this->lazy) {$this->addClass('lazy-unloaded lazy-media lazy-item');}
     }
     // if ($this->crop == true) {
     //   $this->setTag('div');

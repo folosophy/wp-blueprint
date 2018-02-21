@@ -27,6 +27,7 @@ class Icon extends Part {
 
   function setSrc() {
     if (!$this->file) {$this->file = $this->name . '.svg';}
+    elseif (!strpos('.',$this->file)) {$this->file .= '.svg';}
     $src = get_template_directory_uri() . '/assets/img/icon-' . $this->file;
     $this->setAttr('src',$src);
     return $this;

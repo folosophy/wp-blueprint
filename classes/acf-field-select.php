@@ -10,6 +10,11 @@ class Select extends Choice {
     $this->setRequired(false);
   }
 
+  function setAllowNull($bool) {
+    $this->field['allow_null'] = (bool) $bool;
+    return $this;
+  }
+
   function setAjax($ajax) {
     if ($ajax) {$this->field['ajax'] = 1;}
     return $this;

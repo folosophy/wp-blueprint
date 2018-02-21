@@ -19,7 +19,9 @@ class Button extends Part {
 
     $this->setTag('a');
     $this->setType('primary');
-    $this->addClass('lazy-item lazy-unloaded');
+
+    $this->setLazy(true);
+
   }
 
   function getLabel() {
@@ -73,6 +75,9 @@ class Button extends Part {
     if (!$this->label) {$this->setLabel();}
     if ($this->type) {$this->addClass($this->type);}
     $this->addHtml($this->label);
+
+    if ($this->lazy) {$this->addClass('lazy-button');}
+
   }
 
 }

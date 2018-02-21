@@ -30,7 +30,8 @@ class Group {
       ->setOrder('middle');
       //setPosition('low');
     if ($parent) {$this->setParent($parent);}
-    add_action('init',array($this,'register'));
+    add_action('bp/acf/filter_fields',array($this,'filter'));
+    add_action('bp/acf/register_fields',array($this,'register'));
   }
 
   function addFlexibleContent($name) {
@@ -52,23 +53,10 @@ class Group {
     return $this;
   }
 
-  function setLocation($val=null,$param='post_type',$operator='==',$chain=false) {
-    // Check if specific to certain page or post
-    $vals  = array('front_page');
-    $params = array('page','post','page_type','options_page');
-    if ($val == 'front_page') {
-      $param = 'page_type';
-      // TODO: other specifics
-    }
-    //
-    if (is_string($val)) {
-      $val = array($val);
-    }
-    $location = (new Location($this));
-    if ($val) {$location->addLocation($val,$param,$operator);}
-    $this->location = $location;
-    if ($chain) {return $location;}
-    else {return $this;}
+  function setLocation($param=null,$val=null,$operator='==') {
+    $this->location = $location = (new Location($this));
+    if ($param) {$location->addLocation($param,$val,$operator); return $this;}
+    else {return $location;}
   }
 
   function setOrder($order,$place=null) {
@@ -139,6 +127,11 @@ class Group {
 
   function dumpGroup() {
     diedump($this->group);
+  }
+
+  function filter() {
+    $tag = 'bp/acf/group/' . $this->name;
+    apply_filters($tag,$this);
   }
 
   function register() {
