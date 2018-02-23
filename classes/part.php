@@ -331,12 +331,19 @@ class Part {
 
       if ($target) {
         if ($target == 'external') {
-          $this->setTarget('__blank');
+          $this->setTarget('_blank');
         } else {
           $target = str_replace('_link','',$target);
           $link = $target . '-' . $link;
           $link = '#' . $link;
         }
+      } else {
+        if (strpos($link,get_bloginfo('url')) === false) {
+          $this->setTarget('_blank');
+        }
+        // if (strpos($link) > 0) {
+        //   $this->setTarget('_blank');
+        // }
       }
 
     }

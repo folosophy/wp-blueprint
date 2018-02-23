@@ -92,11 +92,6 @@ $featured_media = (new Group('featured_media'))
 
   apply_filters('bp_group_featured_media',$featured_media);
 
-  add_action('acf/load_value/key=field_featured_media_image',function($val) {
-    $val = get_post_thumbnail_id();
-    return $val;
-  });
-
   // add_action('acf/load_field/key=field_featured_media_format',function($field) {
   //   var_dump($field);
   //   return $field;

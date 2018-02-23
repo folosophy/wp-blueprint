@@ -52,7 +52,7 @@ jQuery(document).ready(function ($) {
       value: function check() {
 
         var self = this,
-            $sections = $('section');
+            $sections = $('section,header');
 
         // if (self.isLoading) {
         //   self.needsLoading = true;

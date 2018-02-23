@@ -9,9 +9,13 @@ class ListElement extends Part {
   }
 
   function addItem($text) {
-    $this->addPart()
-      ->setTag('li')
-      ->addHtml($text);
+    $item = $this->addPart()
+      ->setTag('li');
+    if (is_object($text)) {
+      $item->addPart($text);
+    } else {
+      $item->addHtml($text);
+    }
     return $this;
   }
 

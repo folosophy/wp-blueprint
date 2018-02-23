@@ -32,4 +32,11 @@ class Image extends acf\Field {
     return $this;
   }
 
+  function setFileType($type) {
+    $type = func_get_args();
+    $type = implode(',',$type);
+    $this->field['mime_types'] = $type;
+    return $this;
+  }
+
 }

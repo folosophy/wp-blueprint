@@ -38,6 +38,11 @@ class Section extends Part {
     return $this;
   }
 
+  function setMargin($margin) {
+    $this->addClass('margin-' . $margin);
+    return $this;
+  }
+
   function setTheme($theme='trans') {
     $theme = 'theme-' . $theme;
     $this->theme = $theme;

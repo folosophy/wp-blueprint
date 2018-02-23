@@ -38,14 +38,14 @@ class PostType {
     $options = array('image','video');
     if ($formats == null) {$formats = array('image');}
     $this->mediaFormats = $formats;
-    add_action('bp_group_featured_media',array($this,'addMediaLocation'));
+    add_action('bp/acf/group/featured_media',array($this,'addMediaLocation'));
     add_action('acf/load_field/key=field_featured_media_format',array($this,'loadMediaFormats'));
     return $this;
   }
 
-  function addMediaLocation($field) {
-    $field->getLocation()->addLocation($this->postType);
-    return $field;
+  function addMediaLocation($group) {
+    $group->getLocation()->addLocation($this->postType);
+    return $group;
   }
 
   function addGroup($name) {

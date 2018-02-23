@@ -79,6 +79,11 @@ trait FieldBuilder {
     return $this->addField($field,$chain);
   }
 
+  function addFile($name,$chain=false) {
+    $field = (new field\File($name,$this));
+    return $this->addField($field,$chain);
+  }
+
 //   function addGoogleMap($name,$chain=false) {
 //   $field = (new field\GoogleMap($name,$this));
 //   return $this->addField($field,$chain);

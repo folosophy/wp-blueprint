@@ -33,22 +33,41 @@ class FooterBar extends Part {
   }
 
   function addCopyright() {
-    $part = (new Text('©' . date('Y') . ' ' . get_bloginfo('name')))
-      ->setClass('footer-bar__copyright')
-      ->setTag('div');
-    $this->addPart($part,false);
+
+    $part = $this->addItem()
+      ->addClass('footer-bar__copyright');
+
+      $part->addText('©' . date('Y') . ' ' . get_bloginfo('name'),true)
+        ->setTag('div');
+
+  }
+
+  function addItem($name=null) {
+    return $this->addPart()
+      ->addClass('item ' . $name);
+  }
+
+  function addSignature($author='Sherpa Design Co.') {
+
+    $sig = $this->addItem()
+      ->addHtml('Site by ');
+
+      $sig->addText($author,true)
+        ->addClass('signature__author')
+        ->setLink('http://sherpadesign.co');
+
   }
 
   function addSocial() {
-    $part = (new Part())
-      ->setClass('footer-bar__social');
+    $part = $this->addItem()
+      ->addClass('footer-bar__social');
     $field = get_field('main_social','option');
     foreach ($field as $account) {
       $platform = $account['platform'];
-      $part->addIcon('social-' . $platform . '-white.svg',true)
+      $part->addIcon('social-' . $platform . '-white',true)
         ->setClass('footer-bar__social-item');
     }
-    return $this->addPart($part,false);
+
   }
 
 }

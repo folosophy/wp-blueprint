@@ -138,6 +138,13 @@ class NavMain extends Part {
 
   }
 
+  function setDarkLogo($logo) {
+    $src  = get_template_directory_uri() . '/assets/img/' . $logo;
+    $this->darkLogo = (new Image($src))
+      ->addClass('logo logo-dark');
+      return $this;
+  }
+
   function setMenu() {
     $this->menu = (new MainMenu());
     return $this->menu;
@@ -155,10 +162,9 @@ class NavMain extends Part {
 
   protected function prepareBrand() {
     $brand = $this->getBrand();
-    $name  = $this->getBrandName();
     if ($this->darkLogo) {$brand->insertPart($this->darkLogo);}
     if ($this->lightLogo) {$brand->insertPart($this->lightLogo);}
-    if ($name) {$brand->insertPart($this->getBrandName());}
+    if ($this->brandName) {$brand->insertPart($this->getBrandName());}
     $this->insertPart($brand);
   }
 
@@ -546,6 +552,7 @@ class MenuItem extends Part {
     $label = $this->getLabel();
     if ($this->post) {
       if ($post->url) {$label->setLink($post->url);}
+      else {$label->setTag('div');}
       if (!empty($post->target)) {$this->setTarget('__blank');}
     }
   }

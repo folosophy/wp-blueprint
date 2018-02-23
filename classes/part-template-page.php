@@ -17,14 +17,18 @@ class Page extends Template {
   function setIntro($name='intro',$chain=false) {
     $intro = (new part\Section('intro'))
       ->setTheme('trans')
+      ->setMargin('vertical')
       ->addClass('center');
 
     $wrap = $intro
       ->addContainer('blog')
         ->addClass('center intro')
-        ->addh2(get_field('intro_headline'))
-        ->addCopy(get_field('intro_copy'),true)
-          ->end();
+        ->addh2(get_field('intro_headline'));
+
+    $copy = get_field('intro_copy');
+    if ($copy) {
+      $wrap->addCopy(get_field('intro_copy'),true);
+    }
 
     $button = get_field('intro_button');
 

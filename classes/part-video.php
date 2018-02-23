@@ -40,6 +40,8 @@ class Video extends Part {
 
   protected function getVideoSrc() {
 
+    if (!$this->host) {$this->host = 'youtube';}
+
     if ($this->host == 'youtube') {
       $src = "https://www.youtube.com/embed/$this->videoKey?rel=0&amp;showinfo=0";
     }
