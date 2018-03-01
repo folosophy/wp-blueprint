@@ -25,8 +25,6 @@ jQuery('#postexcerpt .handlediv').after('<div style=\'position:absolute;top:12px
 
 
 
-
-
 // Dump into full screen dev window
 
 function dump_dev($stuff) {
@@ -140,6 +138,14 @@ function bp_contact_form() {
     $name = $fields['name'] ?? 'No Name Provided';
   }
 
+  $fields_list = '';
+
+  foreach ($fields as $key => $val) {
+    $key = ucwords(str_replace('_',' ',$key));
+    $val = ucwords(str_replace('_',' ',$val));
+    $fields_list .= "<p><b>$key:</b> $val</p>\r\n";
+  }
+
   $subject = str_replace('_',' ',$fields['subject']);
   $subject = ucwords($subject);
   $subject = "New $site_name Message ($subject)";
@@ -148,10 +154,7 @@ function bp_contact_form() {
     <html>
       <body>
         <p>You received a new $site_name message.</p>
-        <p><b>Email:</b> $email</p>
-        <p><b>Name:</b> $name</p>
-        <p><b>Message:</b></p>
-        <p>$message</p>
+        $fields_list
       </body>
     </html>
   ";
@@ -177,7 +180,7 @@ function bp_contact_form() {
 // Word Count
 
 function limit_words($text,$limit=200) {
-  $trunc = substr($text,0,200);
+  $trunc = substr($text,0,$limit);
   $trunc = explode(' ',$trunc);
   array_pop($trunc);
   $trunc = implode(' ',$trunc) . ' ...';
@@ -306,4 +309,7 @@ function bp_get_video_thumbnail($host=null,$video_id=null,$post_id=null) {
 
 show_admin_bar(false);
 
-// Remove page attributes meta box
+$cat = (new bp\Taxonomy('event_category'))
+  ->setPostType('event')
+  ->setMetaBox(false)
+  ->setHierarchical(false);

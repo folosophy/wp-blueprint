@@ -8,6 +8,20 @@ class ContactForm {
     this.watchUi();
   }
 
+  checkLogic($form,val) {
+    var $logic = $form.find('.has-logic');
+    $logic.each(function() {
+      var $field = $(this);
+      if ($field.attr('logic-value') == val) {
+        $field.removeClass('hidden_by_logic');
+        $field.find('.element').removeAttr('disabled');
+      } else {
+        $field.addClass('hidden_by_logic');
+        $field.find('.element').attr('disabled','');
+      }
+    });
+  }
+
   watchForms() {
 
     var self = this;
@@ -15,6 +29,13 @@ class ContactForm {
     $('body').on('click','form .button-submit',function(e) {
       e.preventDefault();
       $(this).closest('form').submit();
+    });
+
+    $('form').find('select').on('change',function() {
+      var $field = $(this),
+          $form  = $(this).closest('form'),
+          val    = $field.val();
+      self.checkLogic($form,val);
     });
 
     this.$form.submit(function(e) {
@@ -34,11 +55,15 @@ class ContactForm {
     $fields.each(function(i,el) {
 
       var $field = $(this),
-          $el = $field.find('input,textarea,select');
+          $el = $field.find('.element');
 
-      if ($el.attr('required') && !$el.val()) {
+      console.log($el.length);
+
+      if ($el.attr('required') && $el.is(':not(:disabled)') && !$el.val()) {
+
         self.setFieldError($field);
         return false;
+
       } else {
 
         var name = $el.attr('name');

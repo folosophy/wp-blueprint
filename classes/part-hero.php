@@ -6,34 +6,19 @@ namespace Blueprint\Part;
 
 class Hero extends Part {
 
-  protected $contentType;
-  protected $buttons = array();
-  protected $buttonGroup;
-  protected $copy;
-  protected $defaultButton;
-  protected $defaultHeadline;
-  protected $headline;
-  protected $hero;
-  protected $subHeadline;
   protected $style;
   protected $type;
   protected $class;
   protected $bg;
 
+  use HeroContent;
+
   function init() {
     $this->setType($this->name);
     $this->setTag('section');
     $this->setName('hero');
-  }
-
-  function getHeroContent() {
-    if (!isset($this->content)) {$this->setContent();}
-    return $this->content;
-  }
-
-  function setContent() {
-    $this->content = (new HeroContent());
-    return $this->content;
+    $this->addClass('hero');
+    $this->setHeroContent();
   }
 
   function setType($type=null) {
@@ -48,12 +33,10 @@ class Hero extends Part {
     } else {
       wp_reset_query();
       $field = get_field('hero');
+      $id = get_post_thumbnail_id();
       $this->bg = (new Image())
+        ->setSrc($id)
         ->setClass('hero__bg');
-      if ($field && $field['content_type'] == 'post_select') {
-        $img_id = (int) get_post_thumbnail_id($field['post_select']);
-        if ($img_id) {$this->bg->setSrc($img_id);}
-      }
     }
     return $this;
   }
@@ -63,36 +46,35 @@ class Hero extends Part {
   }
 
   protected function buildInit() {
+
     if (empty($this->bg)) {$this->setBg();}
     if ($this->bg) {$this->addPart($this->bg);}
-    $this->addPart($this->getHeroContent());
+    $this->prepareHeroContent();
     $this->buildClass();
     if (!$this->type) {$this->setType();}
     $this->addClass($this->type);
+
   }
 
 }
 
-class HeroContent extends Part {
+trait HeroContent {
 
+  protected $contentType;
   protected $buttons;
-  protected $button;
+  protected $buttonField;
+  protected $buttonGroup;
   protected $copy;
-  protected $primaryButton;
-  protected $secondaryButton;
+  protected $defaultButton;
   protected $defaultHeadline;
   protected $headline;
-
-  function init() {
-    $this->addClass('hero__content');
-    $this->field = get_field('hero');
-    if ($this->field) {
-      switch ($this->field['content_type']) {
-        case 'manual' : $this->setManualContent(); break;
-        case 'post_select' : $this->setPostSelectContent(); break;
-      }
-    }
-  }
+  protected $hero;
+  protected $subHeadline;
+  protected $button;
+  protected $primaryButton;
+  protected $secondaryButton;
+  protected $defaultCopy;
+  protected $heroContent;
 
   function getButton() {
     if (!isset($this->button)) {$this->setButton();}
@@ -109,6 +91,11 @@ class HeroContent extends Part {
     return $this->copy;
   }
 
+  function getDefaultCopy() {
+    if (!isset($this->defaultCopy)) {$this->setDefaultCopy();}
+    return $this->defaultCopy;
+  }
+
   function getHeadline() {
     if (!isset($this->headline)) {
       if (isset($this->defaultHeadline)) {
@@ -118,6 +105,29 @@ class HeroContent extends Part {
       }
     }
     return $this->headline;
+  }
+
+  function getHeroContent() {
+    if (!isset($this->heroContent)) {$this->setHeroContent();}
+    return $this->heroContent;
+  }
+
+  function setDefaultCopy($copy=null) {
+    $this->defaultCopy = (new Text($copy))
+      ->setLazy(true)
+      ->addClass('hero__copy');
+    return $this;
+  }
+
+  function setHeroContent() {
+    $this->heroContent = (new Part('hero__content'));
+    $this->field = get_field('hero');
+    if ($this->field) {
+      switch ($this->field['content_type']) {
+        case 'manual' : $this->setManualContent(); break;
+      }
+    }
+    return $this->heroContent;
   }
 
   function getSecondaryButton() {
@@ -132,7 +142,8 @@ class HeroContent extends Part {
   }
 
   function setDefaultButton($name=null,$chain=false) {
-    $button = $this->makeButton($name);
+    $button = $this->makeButton($name)
+      ->addClass('hero__button-primary');
     return $this->setPart($button,$chain,'defaultButton');
   }
 
@@ -150,10 +161,9 @@ class HeroContent extends Part {
   }
 
   function setManualContent() {
-    // TODO: create static function for retreiving button stuff
     $this->setHeadline();
-    $field = $this->field['button'];
-    $button = $this->setButton(null,true);
+    $this->buttonField = $this->field['button'] || null;
+    $button = $this->setButton();
     return $this;
   }
 
@@ -172,11 +182,23 @@ class HeroContent extends Part {
     else {return $this;}
   }
 
+  function setSubHeadline($headline=null) {
+    $this->subHeadline = (new Headline($headline))
+      ->setTag('h4');
+    return $this;
+  }
+
   function setButton($name=null,$chain=false) {
-    $button = $this->makeButton()
+
+    if ($this->buttonField) {
+      $field = $this->buttonField;
+    }
+
+    $button = $this->makeButton($field['label'])
       ->setField(get_field('hero_button'))
       ->addClass('hero__button hero__button-primary');
     return $this->setPart($button,$chain,'button');
+
   }
 
   function setCopy($copy=null) {
@@ -210,19 +232,30 @@ class HeroContent extends Part {
       $this->getButtons()
         ->insertPart($this->secondaryButton);
     }
-    return $this->buttons;
+    if ($this->buttons) {
+      $this->content->addPart($this->buttons);
+    }
   }
 
-  function buildInit() {
-    $wrap = $this->addPart()
-      ->setClass('hero__content__wrap');
+  function prepareHeroContent() {
+
+    $content = $this->content = $this->addPart('hero__content');
+
+    if ($this->subHeadline) {
+      $wrap->addPart($this->subHeadline);
+    }
+
     if ($this->getHeadline()) {
-      $h = $wrap->addh2($this->getHeadline(),true)
+      $h = $content->addh2($this->getHeadline(),true)
         ->setTag('h1')
         ->addClass('hero__headline');
     }
-    if ($this->copy) {$wrap->insertPart($this->copy);}
-    $wrap->addPart($this->prepareButtons());
+
+    if ($this->copy) {$content->insertPart($this->copy);}
+    elseif ($this->defaultCopy) {$content->addPart($this->getDefaultCopy());}
+
+    $this->prepareButtons();
+
   }
 
 }

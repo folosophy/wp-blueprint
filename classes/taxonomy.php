@@ -23,6 +23,11 @@ class Taxonomy {
     return $this;
   }
 
+  function setMetaBox($bool) {
+    $this->args['meta_box_cb'] = (bool) $bool;
+    return $this;
+  }
+
   function setPostType($type) {
     $this->postType = $type;
     return $this;

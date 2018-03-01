@@ -21,7 +21,7 @@ class Repeater extends acf\Field {
       $field = $field->getField();
       array_push($this->field['sub_fields'],$field);
     }
-    return $this->field;
+    return parent::getField();
   }
 
   function endRepeater() {

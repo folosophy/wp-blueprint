@@ -180,7 +180,7 @@ jQuery(document).ready(function ($) {
                   $(window).scroll();
                 }, 100);
               } else {
-                self.$loadMore.text('No posts found.');
+                self.$loadMore.text('End of results.');
                 setTimeout(function () {
                   self.$loadMore.remove();
                 }, 1500);

@@ -145,6 +145,8 @@ class Card extends Part {
       if (is_array($title)) {
         $term = get_term($title[0]);
         $title = $term->name;
+      } elseif (is_object($title)) {
+        $title = $title->name;
       }
     }
     if (!$title) {$title = get_post_type();}

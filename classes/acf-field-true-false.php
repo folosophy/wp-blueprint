@@ -17,9 +17,8 @@ class TrueFalse extends acf\Field {
     return $this;
   }
 
-  function setUI($ui = 1) {
-    if (!is_int($ui)) {wp_die(__FUNCTION__ . 'expects int.');}
-    $this->field['ui'] = $ui;
+  function setUI($ui=true) {
+    $this->field['ui'] = (bool) $ui;
     return $this;
   }
 

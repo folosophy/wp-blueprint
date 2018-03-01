@@ -26,16 +26,17 @@ class Field {
     $this->field['wrapper'] = array();
     $this->setRequired(true);
     if (method_exists($this,'init')) {$this->init();}
+    add_action('bp/acf/filter_fields',array($this,'filter'));
   }
 
-  function addSaveKey($key,$table='post') {
+  function addSaveKey($key,$table) {
 
     // Setup vars
     $save = array();
     if (!is_array($this->saveKeys)) {$this->saveKeys = array();}
 
     // Set table type
-    $tables = array('post','option','user');
+    $tables = array('wp_posts','wp_postmeta','wp_options','wp_users');
     if (!in_array($table,$tables)) {diedump('Field addSaveKey: invalid db table');}
     $save['table'] = $table;
 
@@ -119,17 +120,24 @@ class Field {
   }
 
   function saveValue($val) {
+
     if (is_array($this->saveKeys)) {
       foreach ($this->saveKeys as $save) {
         switch($save['table']) {
-          case 'post' :
-            $update = add_post_meta(get_the_ID(),$key,$val);
+          case 'wp_postmeta' :
+            $update = add_post_meta(get_the_ID(),$save['key'],$val);
+            break;
+          case 'wp_posts' :
+            $update = wp_update_post(array(
+              'ID' => get_the_ID(),
+              'post_excerpt' => $val
+            ));
             break;
         }
-        //$update = add_post_meta(get_the_ID(),$key,$val);
       }
     }
     return $val;
+
   }
 
   function setClass($class) {
@@ -143,6 +151,10 @@ class Field {
     }
     $this->field['wrapper']['class'] .= " $class ";
     return $this;
+  }
+
+  function filter() {
+    apply_filters('bp/acf/field/' . $this->name,$this);
   }
 
   function setDefaultValue($value) {

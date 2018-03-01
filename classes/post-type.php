@@ -34,13 +34,22 @@ class PostType {
   function setMedia($formats=null) {
     if (is_array($formats)) {diedump('PostType setMedia does not accept array.');}
     $formats = func_get_args();
+    if (in_array('image',$formats)) {
+      add_filter('bp/acf/group/featured_image',array($this,'addFeaturedImage'));
+    }
     // TODO: filter invalid formats
-    $options = array('image','video');
-    if ($formats == null) {$formats = array('image');}
-    $this->mediaFormats = $formats;
-    add_action('bp/acf/group/featured_media',array($this,'addMediaLocation'));
-    add_action('acf/load_field/key=field_featured_media_format',array($this,'loadMediaFormats'));
+    // $options = array('image','video');
+    // if ($formats == null) {$formats = array('image');}
+    // $this->mediaFormats = $formats;
+    // add_action('bp/acf/group/featured_media',array($this,'addMediaLocation'));
+    // add_action('acf/load_field/key=field_featured_media_format',array($this,'loadMediaFormats'));
     return $this;
+  }
+
+  function addFeaturedImage($group) {
+    $group->getLocation()
+      ->addLocation($this->postType);
+    return $group;
   }
 
   function addMediaLocation($group) {
@@ -104,7 +113,17 @@ class PostType {
   function setCategory() {
     $tax = (new Taxonomy($this->postType . '_category',$this->postType))
       ->setPostType($this->postType)
-      ->setHierarchical(true);
+      ->setLabel('Categories')
+      ->setMetaBox(false)
+      ->setHierarchical(false);
+    $field = (new \Blueprint\Acf\Group($this->postType . '_category'))
+      ->setLocation($this->postType)
+      ->setPosition('side')
+      ->setLabelPlacement('top');
+
+      $field->addTaxonomy($this->postType . '_category',true)
+        ->setUi('radio');
+
     return $this;
   }
 

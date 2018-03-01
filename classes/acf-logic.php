@@ -24,6 +24,8 @@ class Logic {
     return $this;
   }
 
+  // NOTE: operator should be '==' or '!='
+
   function addCondition($field,$value,$operator='==') {
     if (is_bool($value)) {$value = (int) $value;}
     $field = str_replace('field_','',$field);

@@ -32,7 +32,7 @@ class Page extends Template {
 
     $button = get_field('intro_button');
 
-    if (!empty($button['label'])) {
+    if (get_field('intro_button_enabled')) {
       $wrap->addButton()
         ->setType('primary')
         ->setField($button);

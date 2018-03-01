@@ -10,6 +10,11 @@ class Form extends Part {
     $this->setAttr('id','form-' . $this->name);
   }
 
+  function addCheckboxField($name=null,$chain=true) {
+    $field = (new Radio($name));
+    return $this->addPart($field,$chain);
+  }
+
   function addInputField($name=null,$chain=true) {
     $field = (new Input($name));
     return $this->addPart($field,$chain);
@@ -63,12 +68,9 @@ class Form extends Part {
   }
 
   function addTextField($name,$chain=false) {
-    $placeholder = ucwords(str_replace('_',' ',$name));
-    $field = (new Field($name));
+    $field = (new Input($name));
     $el = $field->getFormElement()
-      ->setTag('input')
-      ->setAttr('name',$name)
-      ->setAttr('placeholder',$placeholder);
+      ->setTag('input');
     return $this->addPart($field,$chain);
   }
 
@@ -86,6 +88,7 @@ class Form extends Part {
     $button = $field->addButton($name,$this);
     $button
       ->setType(false)
+      ->setLazy(false)
       ->setAttr('type','submit')
       ->setClass('button-submit');
     return $this->addPart($field,$chain);
@@ -96,13 +99,14 @@ class Form extends Part {
 class Field extends Part {
 
   protected $formElement;
+  protected $logic;
 
   function init() {
     if ($this->name) {
       $this->getFormElement()->setAttr('name',$this->name);
     }
     $this->addClass('field');
-    $this->setLazy(true);
+    $this->setRequired(true);
   }
 
   function getLabel() {
@@ -132,21 +136,52 @@ class Field extends Part {
       ->setAttr('for',$this->name)
       ->addHtml($label);
 
+    return $this;
+
+  }
+
+  function getLogic() {
+    //if (!isset($this->logi))
+  }
+
+  function setLogic($field,$val,$opr='==') {
+    $this->logic = array();
+    array_push($this->logic,array(
+      'field'    => $field,
+      'value'    => $val,
+      'operator' => $opr
+    ));
+    return $this;
   }
 
   function setRequired($required=true) {
     $formEl = $this->getFormElement();
+    $this->required = (bool) $required;
     if ($required) {$formEl->setAttr('required',null);}
+    else {$formEl->unsetAttr('required');}
     return $this;
   }
 
   function prepare() {
 
-    $this->addPart($this->getLabel());
+    $logic = $this->logic;
+    if ($logic) {
+      $this->addClass('has-logic hidden_by_logic');
+      $this->getFormElement()->setAttr('disabled','disabled');
+      foreach ($logic as $con) {
+        $this->setAttr('logic-field',$con['field']);
+        $this->setAttr('logic-value',$con['value']);
+      }
+    }
+
+    $label = $this->addPart($this->getLabel());
+
+    if (!$this->required) {
+      $label->addHtml(" (Optional)");
+    }
 
     $formEl = $this->getFormElement();
-    $this->addClass('field field-' . $this->getFormElement()->tag);
-    if (!isset($formEl->atts['required'])) {$this->setRequired(true);}
+    $this->addClass('field-' . $this->getFormElement()->tag);
     $this->insertPart($this->getFormElement());
   }
 
@@ -155,6 +190,7 @@ class Field extends Part {
 class Select extends Field {
 
   protected $options;
+  protected $logic;
 
   function init() {
     parent::init();
@@ -178,6 +214,8 @@ class Select extends Field {
     return $this;
   }
 
+
+
   function setPlaceholder($key,$val=null) {
     // TODO: rewrite to part
     if (!$val) {
@@ -187,6 +225,8 @@ class Select extends Field {
     $this->getFormElement()->addHtml($option);
     return $this;
   }
+
+
 
 }
 

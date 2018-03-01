@@ -150,10 +150,11 @@ class Single extends part\Template {
 
   function setRecentPosts() {
     $headline = 'Recent ' . ucwords(get_post_type());
-    $this->recentPosts = (new part\Section('recent_posts'));
+    $this->recentPosts = (new part\Section('recent_posts'))
+      ->setMargin('vertical');
 
     $posts = $this->recentPosts
-      ->addWrap()
+      ->addContainer()
         ->addClass('post__recent-posts');
 
     $recent_posts_label =

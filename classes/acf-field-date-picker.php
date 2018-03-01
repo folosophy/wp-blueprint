@@ -3,10 +3,10 @@
 namespace Blueprint\Acf\Field;
 use Blueprint\Acf as acf;
 
-class DateTimePicker extends acf\Field {
+class DatePicker extends acf\Field {
 
   function init() {
-    $this->setType('date_time_picker');
+    $this->setType('date_picker');
     $this->setFormats();
   }
 
@@ -15,16 +15,14 @@ class DateTimePicker extends acf\Field {
     $this->setReturnFormat();
   }
 
-  function setDisplayFormat($format=null) {
-    if (!$format) {$format = $format = 'F j, Y g:i a';}
+  function setDisplayFormat() {
+    $format = 'F j, Y';
     $this->field['display_format'] = $format;
-    return $this;
   }
 
-  function setReturnFormat($format=null) {
-    if (!$format) {$format = 'Y-m-d H:i';}
+  protected function setReturnFormat($format=null) {
+    if (!$format) {$format = 'Y-m-d';}
     $this->field['return_format'] = $format;
-    return $this;
   }
 
 }

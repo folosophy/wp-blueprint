@@ -47,10 +47,10 @@ class FooterBar extends Part {
       ->addClass('item ' . $name);
   }
 
-  function addSignature($author='Sherpa Design Co.') {
+  function addSignature($prepend,$author='Sherpa Design Co.') {
 
     $sig = $this->addItem()
-      ->addHtml('Site by ');
+      ->addHtml($prepend);
 
       $sig->addText($author,true)
         ->addClass('signature__author')
@@ -64,8 +64,11 @@ class FooterBar extends Part {
     $field = get_field('main_social','option');
     foreach ($field as $account) {
       $platform = $account['platform'];
-      $part->addIcon('social-' . $platform . '-white',true)
-        ->setClass('footer-bar__social-item');
+      $part
+        ->addPart('item-social__wrap')
+          ->setLink($account['link'])
+        ->addIcon('social-' . $platform . '-white',true)
+          ->setClass('footer-bar__social-item');
     }
 
   }

@@ -23,26 +23,42 @@ trait FieldBuilder {
   // TODO: Check if is in field group
   // Otherwise, need way to prefix 'button'
   function addButton($name='button',$chain=false) {
+
     $field = (new Field\Group($name,$this));
-    $sub_fields = $field
-      ->addText('label')
-      ->addSelect('link_type')
-        ->setChoices(array(
-          'external' => 'External (Another Website)',
-          'internal' => 'Internal (Your Website)',
-          'section'
-        ))
-        ->endSelect()
-      ->addUrl('external_link',true)
-        ->setLogic('link_type','external')
-        ->end()
-      ->addPostObject('internal_link',true)
-        ->setLogic('link_type','internal')
-        ->end()
-      ->addText('section_link',true)
-        ->setLogic('link_type','section')
-        ->end();
+
+    $field->addText('label');
+
+    $link_type = $field->addSelect('link_type')
+      ->setWidth('40%')
+      ->setChoices(array(
+        'external' => 'External (Another Website)',
+        'internal' => 'Internal (Your Website)',
+        'section'
+      ));
+
+    $external_link = $field->addUrl('external_link',true)
+      ->setLogic('link_type','external');
+
+    $internal_link = $field->addPostObject('internal_link',true)
+      ->setLogic('link_type','internal');
+
+    $section_link = $field->addText('section_link',true)
+      ->setLabel('Section Name')
+      ->setPlaceholder('contact')
+      ->setLogic('link_type','section');
+
+    $link_fields = array(
+      $external_link,
+      $internal_link,
+      $section_link
+    );
+
+    foreach ($link_fields as $link_field) {
+      $link_field->setWidth('60%');
+    }
+
     return $this->addField($field,$chain);
+
   }
 
   function addCheckbox($name) {
@@ -66,7 +82,12 @@ trait FieldBuilder {
 
   function addCopy($name='copy',$chain=false) {
     $field = (new field\Wysiwyg($name,$this));
-    return $this->addField($field);
+    return $this->addField($field,$chain);
+  }
+
+  function addDate($name,$chain=false) {
+    $field = (new field\DatePicker($name,$this));
+    return $this->addField($field,$chain);
   }
 
   function addDateTime($name,$chain=false) {
@@ -206,6 +227,14 @@ trait FieldBuilder {
       $this->currentField = $field;
       return $field;
     } else {return $this;}
+  }
+
+  function addTime($name,$chain=false) {
+    $field = (new field\DateTimePicker($name,$this))
+      ->setDisplayFormat('g:i a')
+      ->setReturnFormat('g:i a')
+      ->setType('time_picker');
+    return $this->addField($field,$chain);
   }
 
   function addTrueFalse($name,$chain=false) {

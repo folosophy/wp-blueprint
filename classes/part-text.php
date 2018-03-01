@@ -4,6 +4,7 @@ namespace Blueprint\Part;
 
 class Text extends Part {
 
+  protected $autop;
   protected $placeholder;
   protected $text;
 
@@ -20,11 +21,49 @@ class Text extends Part {
     return $this->checkSet('text');
   }
 
+  function setAutop($bool) {
+    $this->autop = (bool) $bool;
+    // TODO: wait to make text until build
+    $this->setText($this->text);
+    return $this;
+  }
+
   function setPlaceholder($text=null) {
     if (!$text) {$text = 'Donec sodales sagittis magna. Praesent egestas tristique nibh. Phasellus viverra nulla ut metus varius laoreet. Phasellus volutpat, metus eget egestas mollis.';}
     $this->placeholder = $text;
     return $this;
   }
+
+  // function addText() {
+  //
+  //   if ($text) {
+  //
+  //     if (strpos($text,'<p')) {
+  //
+  //       $this->setTag('div');
+  //
+  //       $this->text = preg_replace('/<p>\s*(<a .*>)?\s*(<img .* \/>)\s*(<\/a>)?\s*<\/p>/iU', '\1\2\3', $text);
+  //
+  //       $text = str_replace('</p>','',$text);
+  //       $text = explode('<p>',$text);
+  //       $text = array_filter($text); // Remove empty p tags
+  //
+  //       foreach ($text as $p) {
+  //         $el = (new Text($p))
+  //           ->addClass('multi')
+  //           ->build();
+  //         $this->text .= $el;
+  //       }
+  //
+  //     } else {
+  //       $this->text .= $text;
+  //     }
+  //
+  //   } else {
+  //     $this->text = $this->getPlaceholder();
+  //   }
+  //
+  // }
 
   function setText($text=null) {
 
@@ -36,20 +75,22 @@ class Text extends Part {
 
         $this->text = preg_replace('/<p>\s*(<a .*>)?\s*(<img .* \/>)\s*(<\/a>)?\s*<\/p>/iU', '\1\2\3', $text);
 
-        // $text = str_replace('</p>','',$text);
-        // $text = explode('<p>',$text);
-        // $text = array_filter($text); // Remove empty p tags
-        //
-        // foreach ($text as $p) {
-        //   diedump();
-        //   $el = (new Text($p))
-        //     ->addClass('multi')
-        //     ->build();
-        //   $this->text .= $el;
-        //}
+        $text = str_replace('</p>','',$text);
+        $text = explode('<p>',$text);
+        $text = array_filter($text); // Remove empty p tags
+
+        foreach ($text as $p) {
+          $el = (new Text($p))
+            ->addClass('multi')
+            ->build();
+          $this->text .= $el;
+        }
 
       } else {
-        $this->text = $text;
+        if ($this->autop) {
+          $this->text = apply_filters('the_content',$text);
+        }
+        else {$this->text = $text;}
       }
 
     } else {

@@ -9,6 +9,7 @@ class Taxonomy extends acf\Field {
 
   protected function init() {
     $this->field['type'] = 'taxonomy';
+    $this->setReturnFormat('object');
   }
 
   function setAddTerm($add) {

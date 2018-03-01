@@ -96,6 +96,11 @@ class Part {
     return $this->addPart($part,$chain);
   }
 
+  function addSpan($text=null,$chain=true) {
+    return $this->addP($text,$chain)
+      ->setTag('span');
+  }
+
   function addText($text=null,$chain=false) {
     $part = (new Text($text));
     return $this->addPart($part,$chain);
@@ -459,6 +464,11 @@ class Part {
 
   function setWrap($wrap) {
     $this->class .= 'wrap-' . $wrap;
+    return $this;
+  }
+
+  function unsetAttr($name) {
+    unset($this->atts[$name]);
     return $this;
   }
 
