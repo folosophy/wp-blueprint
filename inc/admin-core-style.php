@@ -15,6 +15,7 @@ function bp_acf_admin_style() {
       .-top > .nolabel > .acf-label {display:none;}
       #commentstatusdiv {display:none;}
 
+      .acf-field-editor iframe {min-height:800px;}
       .acf-clone-fields {border:none !important; padding:none !important;}
 
       .acf-field-group.nolabel::before {display:none !important;}

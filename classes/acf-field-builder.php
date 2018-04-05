@@ -24,6 +24,8 @@ trait FieldBuilder {
   // Otherwise, need way to prefix 'button'
   function addButton($name='button',$chain=false) {
 
+    if (!$name) {$name = 'button';}
+
     $field = (new Field\Group($name,$this));
 
     $field->addText('label');
@@ -122,7 +124,7 @@ trait FieldBuilder {
 
   function addHeadline($name='headline',$chain=false) {
     $field = (new Field\Text($name,$this))
-      ->setMaxLength(60);
+      ->setMaxLength(100);
     array_push($this->fields,$field);
     if ($chain) {
       $this->currentField = $field;
@@ -130,7 +132,7 @@ trait FieldBuilder {
     } else {return $this;}
   }
 
-  function addIconSelect($name='icon',$chain=false) {
+  function addIconSelect($name='icon',$chain=true) {
     $field = (new Field\IconSelect($name,$this));
     return $this->addField($field,$chain);
   }

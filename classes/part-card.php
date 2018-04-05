@@ -22,7 +22,12 @@ class Card extends Part {
   protected $type;
 
   function init() {
-    if ($this->name) {$this->setType($this->name);}
+    if ($this->name) {
+      if (is_int($this->name)) {
+        $this->setPost($this->name);
+      }
+      elseif (is_string($this->name)) {$this->setType($this->name);}
+    }
     $this->setLazy(true);
   }
 
@@ -90,10 +95,12 @@ class Card extends Part {
   }
 
   function setExcerpt($excerpt=null) {
-    if (!$excerpt) {$excerpt = get_the_excerpt($this->post_id);}
+    if (!$excerpt) {
+      $excerpt = get_field('excerpt',$this->post_id) ?: get_the_excerpt($this->post_id);
+    }
     if ($excerpt) {
       $excerpt = wp_strip_all_tags($excerpt,true);
-      $excerpt = limit_words($excerpt,200);
+      $excerpt = limit_words($excerpt,120);
     }
     $this->excerpt = (new Text($excerpt))
       ->setTag('p')

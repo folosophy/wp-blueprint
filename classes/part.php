@@ -36,10 +36,15 @@ class Part {
     if (method_exists($this,'init')) {$this->init();}
   }
 
-  function addCard($post=null,$chain=false) {
+  function addCard($post=null,$chain=true) {
     $part = (new Card($post,$this));
     if ($post) {$part->setPost($post);}
     return $this->addPart($part,$chain);
+  }
+
+  function addEl($tag,$name,$chain=true) {
+    return $this->addPart($name,$chain)
+      ->setTag($tag);
   }
 
   function addForm($name=null,$chain=true) {
@@ -70,7 +75,8 @@ class Part {
   function addContainer($type='main',$chain=true) {
     $class='container-' . $type;
     $part = (new Part())
-      ->setClass($class);
+      ->addClass('container')
+      ->addClass($class);
     return $this->addPart($part,$chain);
   }
 
@@ -101,6 +107,16 @@ class Part {
       ->setTag('span');
   }
 
+  function addThemeImage($file,$chain=true) {
+    $part = $this->addImage($file,true);
+    return $part;
+  }
+
+  function addThemePart($name,$chain=false) {
+    $part = $this->addHtml(bp_get_part($name));
+    return $part;
+  }
+
   function addText($text=null,$chain=false) {
     $part = (new Text($text));
     return $this->addPart($part,$chain);
@@ -109,7 +125,8 @@ class Part {
   function addWrap($type='main',$chain=true) {
     $class='wrap-' . $type;
     $part = (new Part())
-      ->setClass($class);
+      ->addClass('wrap')
+      ->addClass($class);
     return $this->addPart($part,$chain);
   }
 
@@ -205,6 +222,7 @@ class Part {
   function addAttr($attr,$val) {
     if (!empty($this->atts[$attr])) {$this->atts[$attr] .= ' ' . $val;}
     else {$this->atts[$attr] = $val;}
+    return $this;
   }
 
   function addButton($name=null,$chain=true) {
@@ -325,8 +343,6 @@ class Part {
 
   function setLink($link=null,$target=null) {
 
-    if ($link == 52) {diedump(intval($link));}
-
     $this->setTag('a');
 
     if (intval($link) > 0) {
@@ -335,6 +351,7 @@ class Part {
     elseif (is_string($link)) {
 
       if ($target) {
+
         if ($target == 'external') {
           $this->setTarget('_blank');
         } else {
@@ -342,13 +359,15 @@ class Part {
           $link = $target . '-' . $link;
           $link = '#' . $link;
         }
-      } else {
-        if (strpos($link,get_bloginfo('url')) === false) {
+
+      }
+      else {
+        if (strpos($link,'#') == 0) {
+
+        }
+        elseif (strpos($link,get_bloginfo('url')) === false) {
           $this->setTarget('_blank');
         }
-        // if (strpos($link) > 0) {
-        //   $this->setTarget('_blank');
-        // }
       }
 
     }
@@ -416,6 +435,10 @@ class Part {
     if (is_object($post)) {
       $this->post    = $post;
       $this->post_id = $post->ID;
+    } elseif (is_int($post)) {
+      $post = get_post($post);
+      $this->post    = $post;
+      $this->post_id = $post->ID;
     }
     return $this;
   }
@@ -430,6 +453,7 @@ class Part {
 
   function setId($id=null) {
     if ($id !== false) {$this->id = $id;}
+    $this->setAttr('id',$id);
     return $this;
   }
 

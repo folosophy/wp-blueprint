@@ -110,18 +110,23 @@ class PostType {
     return $this;
   }
 
-  function setCategory() {
-    $tax = (new Taxonomy($this->postType . '_category',$this->postType))
+  function setCategory($name=null) {
+
+    if (!$name) {$name = 'category';}
+
+    $tax = (new Taxonomy($this->postType . '_' . $name,$this->postType))
       ->setPostType($this->postType)
       ->setLabel('Categories')
       ->setMetaBox(false)
       ->setHierarchical(false);
-    $field = (new \Blueprint\Acf\Group($this->postType . '_category'))
+
+    $field = (new \Blueprint\Acf\Group($name))
       ->setLocation($this->postType)
       ->setPosition('side')
       ->setLabelPlacement('top');
 
-      $field->addTaxonomy($this->postType . '_category',true)
+      $field->addTaxonomy($this->postType . '_' . $name,true)
+        ->setTaxonomy($this->postType . '_' . $name)
         ->setUi('radio');
 
     return $this;

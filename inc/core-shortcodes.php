@@ -12,7 +12,6 @@ function bp_button($atts) {
 
   $label = $atts['label'] ?? null;
   $button = (new part\Button($label));
-
   if (isset($atts['align'])) {
     $el = (new part\Part())
       ->addClass($atts['align']);
@@ -32,7 +31,7 @@ function bp_button($atts) {
 function bp_video_shortcode($atts) {
 
   $iframe = (new part\Part())
-    ->addContainer('blog');
+    ->addClass('video-temp');
 
     $iframe->addVideo(null,true)
       ->setVideoKey($atts['key']);

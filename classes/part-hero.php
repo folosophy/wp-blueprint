@@ -6,6 +6,7 @@ namespace Blueprint\Part;
 
 class Hero extends Part {
 
+  protected $content;
   protected $style;
   protected $type;
   protected $class;
@@ -19,6 +20,11 @@ class Hero extends Part {
     $this->setName('hero');
     $this->addClass('hero');
     $this->setHeroContent();
+  }
+
+  function setContent($bool) {
+    if (!$bool) {$this->content = false;}
+    return $this;
   }
 
   function setType($type=null) {
@@ -36,7 +42,7 @@ class Hero extends Part {
       $id = get_post_thumbnail_id();
       $this->bg = (new Image())
         ->setSrc($id)
-        ->setClass('hero__bg');
+        ->setClass('hero__bg bg');
     }
     return $this;
   }
@@ -47,7 +53,7 @@ class Hero extends Part {
 
   protected function buildInit() {
 
-    if (empty($this->bg)) {$this->setBg();}
+    if ($this->bg || $this->bg === null) {$this->setBg();}
     if ($this->bg) {$this->addPart($this->bg);}
     $this->prepareHeroContent();
     $this->buildClass();
@@ -123,7 +129,7 @@ trait HeroContent {
     $this->heroContent = (new Part('hero__content'));
     $this->field = get_field('hero');
     if ($this->field) {
-      switch ($this->field['content_type']) {
+      switch ($this->field['content_type'] ?? 'default') {
         case 'manual' : $this->setManualContent(); break;
       }
     }
@@ -190,7 +196,9 @@ trait HeroContent {
 
   function setButton($name=null,$chain=false) {
 
-    if ($this->buttonField) {
+    if (is_array($name)) {
+      $field = $name;
+    } elseif ($this->buttonField) {
       $field = $this->buttonField;
     }
 
@@ -202,9 +210,13 @@ trait HeroContent {
   }
 
   function setCopy($copy=null) {
-    $this->copy = (new Text($copy))
-      ->setTag('p')
-      ->setClass('hero__copy');
+    if ($copy === false) {
+      $this->copy = false;
+    } else {
+      $this->copy = (new Text($copy))
+        ->setTag('p')
+        ->setClass('hero__copy');
+    }
     return $this;
   }
 
@@ -214,10 +226,11 @@ trait HeroContent {
   }
 
   function makeButton($label) {
-    return (new Button())
+    $button = (new Button())
       ->setLabel($label)
       ->setType('hero')
       ->addClass('hero__button');
+    return $button;
   }
 
   function prepareButtons() {
@@ -239,6 +252,8 @@ trait HeroContent {
 
   function prepareHeroContent() {
 
+    if ($this->content === false) {return false;}
+
     $content = $this->content = $this->addPart('hero__content');
 
     if ($this->subHeadline) {
@@ -251,8 +266,11 @@ trait HeroContent {
         ->addClass('hero__headline');
     }
 
-    if ($this->copy) {$content->insertPart($this->copy);}
-    elseif ($this->defaultCopy) {$content->addPart($this->getDefaultCopy());}
+    if ($this->copy === false) {
+    } else {
+      if ($this->copy) {$content->insertPart($this->copy);}
+      elseif ($this->defaultCopy) {$content->addPart($this->getDefaultCopy());}
+    }
 
     $this->prepareButtons();
 

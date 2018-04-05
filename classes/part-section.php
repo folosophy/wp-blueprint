@@ -32,6 +32,11 @@ class Section extends Part {
     return $this;
   }
 
+  function setCollapse($dir) {
+    $this->addClass('collapse-' . $dir);
+    return $this;
+  }
+
   function setId($id=null) {
     if (!$id) {$id = 'section-' . $this->name;}
     $this->atts['id'] = $id;

@@ -13,6 +13,7 @@ class Group extends acf\Field {
 
   function init() {
     $this->setType('group');
+    $this->setRequired(false);
     if (is_object($this->parent) && get_parent_class($this->parent) == "Blueprint\\Acf\\Field") {
       $this->setLayout('block');
     } else {

@@ -9,7 +9,7 @@ class IconSelect extends Select {
   }
 
   function setGlob($glob) {
-    $glob = get_template_directory() . '/assets/img/' . $glob;
+    $glob = get_template_directory() . '/assets/img/icon-' . $glob;
     $glob = glob($glob);
     foreach ($glob as $file) {
       $start = strpos($file,'icon-');

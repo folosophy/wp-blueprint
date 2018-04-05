@@ -20,7 +20,7 @@ class Script extends Enqueue {
     array_push($this->localize,$localize);
   }
 
-  function setFooter() {
+  function setInFooter() {
     $this->footer = true;
     return $this;
   }

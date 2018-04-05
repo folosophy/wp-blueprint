@@ -8,6 +8,7 @@ class Form extends Part {
   function init() {
     $this->setTag('form');
     $this->setAttr('id','form-' . $this->name);
+    $this->setAttr('name',ucwords($this->name));
   }
 
   function addCheckboxField($name=null,$chain=true) {

@@ -9,6 +9,7 @@ class Field {
   use Builder;
   use bp\Chain;
 
+  protected $debugId;
   protected $name;
   protected $field = array();
   protected $hidden;
@@ -29,7 +30,14 @@ class Field {
     add_action('bp/acf/filter_fields',array($this,'filter'));
   }
 
-  function addSaveKey($key,$table) {
+  function addSaveKey($key,$table=null) {
+
+    if (!$table) {
+      switch ($key) {
+        case 'post_title'   : $table = 'wp_posts'; break;
+        case 'post_content' : $table = 'wp_posts'; break;
+      }
+    }
 
     // Setup vars
     $save = array();
@@ -56,8 +64,9 @@ class Field {
     apply_filters($tag,$this);
   }
 
-  function disable() {
+  function setDisabled() {
     $this->field['disabled'] = true;
+    $this->field['readonly'] = 1;
     return $this;
   }
 
@@ -88,6 +97,11 @@ class Field {
 
   function getType() {
     return $this->field['type'];
+  }
+
+  function setDebugId($id) {
+    $this->debugId = $id;
+    return $this;
   }
 
   function hideLabel() {
@@ -125,12 +139,12 @@ class Field {
       foreach ($this->saveKeys as $save) {
         switch($save['table']) {
           case 'wp_postmeta' :
-            $update = add_post_meta(get_the_ID(),$save['key'],$val);
+            $update = update_post_meta(get_the_ID(),$save['key'],$val);
             break;
           case 'wp_posts' :
             $update = wp_update_post(array(
               'ID' => get_the_ID(),
-              'post_excerpt' => $val
+              $save['key'] => $val
             ));
             break;
         }
@@ -162,12 +176,17 @@ class Field {
     return $this;
   }
 
+  function setHidden($bool) {
+    $this->hidden = (bool) $bool;
+    return $this;
+  }
+
   function setInstructions($desc) {
     $this->field['instructions'] = $desc;
     return $this;
   }
 
-   protected function setKey($key) {
+  function setKey($key) {
     $key = $this->prefix . $key;
     $this->key = $key;
     $this->field['key'] = $key;
@@ -185,6 +204,7 @@ class Field {
 
   function set_Name() {
     $this->field['_name'] = '_' . $this->getName();
+    return $this;
   }
 
   function setLabel($label=null) {
@@ -201,7 +221,7 @@ class Field {
 
   function setRequired($required=1) {
     if ($required) {$this->field['required'] = $required;}
-    else {$this->field['required'] = 0;}
+    else {unset($this->field['required']);}
     return $this;
   }
 
@@ -213,6 +233,9 @@ class Field {
   function getField() {
     if ($this->logic) {
       $this->field['conditional_logic'] = $this->logic->getConditions();
+    }
+    if ($this->hidden) {
+      $this->addClass('hidden');
     }
     return $this->field;
   }

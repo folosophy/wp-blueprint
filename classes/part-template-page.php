@@ -17,11 +17,11 @@ class Page extends Template {
   function setIntro($name='intro',$chain=false) {
     $intro = (new part\Section('intro'))
       ->setTheme('trans')
-      ->setMargin('vertical')
+      ->setCollapse('vertical')
       ->addClass('center');
 
     $wrap = $intro
-      ->addContainer('blog')
+      ->addWrap('blog')
         ->addClass('center intro')
         ->addh2(get_field('intro_headline'));
 

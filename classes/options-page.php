@@ -19,7 +19,7 @@ class OptionsPage {
 
   function addSubPage($name,$chain=false) {
     $page = (new OptionsPage('footer'))
-      ->setParent($this->options['menu_slug']);
+      ->setParent('?page=' . $this->options['menu_slug']);
     return $this;
   }
 

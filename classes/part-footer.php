@@ -5,7 +5,9 @@ namespace Blueprint\Part;
 class Footer extends Part {
 
   function init() {
+
     $this->setTag('footer');
+    $this->setId('footer');
     $this->addHtml("
       <div id='site-search'>
         <div id='site-search__wrap'>
@@ -20,6 +22,14 @@ class Footer extends Part {
   function addFooterBar() {
     $part = (new FooterBar());
     return $this->addPart($part,true);
+  }
+
+  function build() {
+    ob_start();
+    wp_footer();
+    $footer = ob_get_clean();
+    $this->addHtml($footer);
+    return parent::build();
   }
 
 }

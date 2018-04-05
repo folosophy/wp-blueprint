@@ -40,10 +40,12 @@ class Button extends Part {
       $this->field = $field['button'];
       $field = $field['button'];
     }
-    $link_type = $field['link_type'];
-    $link = $field[$link_type . '_link'];
-    $this->setLink($link,$link_type);
-    $this->setLabel($field['label']);
+    if (isset($field['link_type'])) {
+      $link_type = $field['link_type'];
+      $link = $field[$link_type . '_link'];
+      $this->setLink($link,$link_type);
+      $this->setLabel($field['label']);
+    }
     return $this;
   }
 
@@ -63,7 +65,7 @@ class Button extends Part {
 
   function setType($type=null) {
     if ($type === false) {$type = null;}
-    else {$type = 'btn-' . $type;}
+    else {$type = 'btn-' . $type . ' button-' . $type;}
     $this->type = $type;
     return $this;
   }

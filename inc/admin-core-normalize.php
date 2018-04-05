@@ -14,8 +14,6 @@ function register_theme_menus() {
 add_action('init','register_theme_menus');
 add_theme_support( 'post-thumbnails' );
 
-
-
 function rmpts() {
   remove_post_type_support('page','editor');
 } add_action('init','rmpts');

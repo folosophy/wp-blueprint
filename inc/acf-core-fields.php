@@ -164,11 +164,8 @@ $main_social = (new Group('main_social'))
       ->endSelect()
     ->addUrl('link')
     ->addText('handle',true)
+      ->setRequired(false)
       ->setPrepend('@');
-
-$text_elements = (new Group('text_elements'))
-  ->addText('headline')
-  ->setLocation('post');
 
 $group_user = $gusr = (new Group('user'))
   ->setTitle('Basic Info')
@@ -215,20 +212,34 @@ $g_intro = (new Group('intro'))
 
   $intro = $g_intro ->addGroup('intro');
 
-    $intro->addHeadline();
+    $intro->addHeadline('headline',true);
     $intro->addCopy();
+
     $intro->addTrueFalse('button_enabled',true)
-      ->setLabel('Enable Button');
+      ->setDebugId(1)
+      ->setLabel('Enable Button')
+      ->setRequired(false);
 
     $intro->addButton('button',true)
+      ->setRequired(false)
       ->setLogic('button_enabled',true);
 
 $editor = (new Group('editor'))
+  ->setTitle('Post Content')
   ->setLocation('template','page')
-  ->setStyle('seamless');
+  ->setLabelPlacement('top');
 
   $editor->addWysiwyg('editor',true)
-    ->setMedia(true);
+    ->setMedia(true)
+    ->addSaveKey('post_content','wp_posts');
+
+  // add_filter('acf/load_value/key=field_editor',function($value) {
+  //
+  //   $post = get_post(get_the_ID());
+  //   diedump($post);
+  //   //if (!$value) {$value = get_the_content();}
+  //   return $value;
+  // });
 
 // Events
 // TODO: MTF Activate with events class, etc
@@ -367,13 +378,12 @@ $guest_author = (new Group('guest_author'));
 
 apply_filters('bp_group_guest_author',$guest_author);
 
-// Post Meta
-// TODO: conditional for different post types
-$g_meta = (new Group('meta'))
-  ->setLocation('work');
+$meta = (new Group('meta'));
 
-  // TODO save key
-  $g_meta->addTextArea('excerpt');
+  $m = $meta->addGroup('meta');
+
+    $m->addTextarea('excerpt',true)
+      ->addSaveKey('post_excerpt','wp_posts');
 
 $g_ft_image = (new Group('featured_image'))
   ->setLabelPlacement('top')
@@ -381,6 +391,10 @@ $g_ft_image = (new Group('featured_image'))
 
   $g_ft_image->addImage('featured_image',true)
     ->addSaveKey('_thumbnail_id','wp_postmeta');
+
+  // add_filter('acf/load_value/key=field_featured_image',function($value,$id) {
+  //   return $value;
+  // });
 
 ////////////////////////////////////////////////////////
 // OPTIONS

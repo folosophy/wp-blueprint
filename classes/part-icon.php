@@ -36,7 +36,7 @@ class Icon extends Part {
   protected function buildInit() {
     if (!isset($this->atts['src'])) {$this->setSrc();}
     if (!$this->getAttr('alt')) {$this->setAlt();}
-    if (!$this->getAttr('class')) {$this->setClass('img');}
+    $this->addClass('icon');
   }
 
 }
